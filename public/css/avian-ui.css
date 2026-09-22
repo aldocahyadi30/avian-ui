@@ -747,6 +747,10 @@
     align-items: center;
     justify-content: space-between;
     gap: 8px;
+    /* `.aui-select` reserves 34px on the right for its native background-image
+       arrow — the combobox draws its own arrow icon as a flex child instead,
+       so it needs the same padding on both sides. */
+    padding-right: 12px;
     background-image: none;
     text-align: left;
     cursor: pointer;

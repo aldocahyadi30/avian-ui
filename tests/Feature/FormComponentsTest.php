@@ -34,6 +34,7 @@ it('wires a numeric input to the alpine money mask as a text field', function ()
     $html = Blade::render('<x-avian::input name="budget" label="Budget" numeric />');
 
     expect($html)->toContain('x-mask:dynamic="$money($input)"')
+        ->toContain('x-data="{}"')
         ->toContain('type="text"')
         ->toContain('inputmode="decimal"')
         ->not->toContain('type="number"');
