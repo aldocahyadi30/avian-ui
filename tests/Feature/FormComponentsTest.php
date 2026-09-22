@@ -1,0 +1,285 @@
+<?php
+
+declare(strict_types=1);
+
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\MessageBag;
+use Illuminate\Support\ViewErrorBag;
+
+function bindErrors(array $messages, string $bag = 'default'): void
+{
+    View::share('errors', (new ViewErrorBag)->put($bag, new MessageBag($messages)));
+}
+
+it('renders an input with its label, hint and generated id', function () {
+    $html = Blade::render('<x-avian::input name="email" label="Email address" hint="We never share it." />');
+
+    expect($html)->toContain('class="aui-field"')
+        ->toContain('<label class="aui-label" for="aui-email">Email address</label>')
+        ->toContain('class="aui-input"')
+        ->toContain('name="email"')
+        ->toContain('id="aui-email"')
+        ->toContain('<span class="aui-hint">We never share it.</span>');
+});
+
+it('marks required inputs on both the label and the control', function () {
+    $html = Blade::render('<x-avian::input name="name" label="Name" required />');
+
+    expect($html)->toContain('aui-label aui-label-required')
+        ->toContain('required="required"');
+});
+
+it('wires a numeric input to the alpine money mask as a text field', function () {
+    $html = Blade::render('<x-avian::input name="budget" label="Budget" numeric />');
+
+    expect($html)->toContain('x-mask:dynamic="$money($input)"')
+        ->toContain('type="text"')
+        ->toContain('inputmode="decimal"')
+        ->not->toContain('type="number"');
+});
+
+it('leaves a plain input without any mask attributes', function () {
+    $html = Blade::render('<x-avian::input name="budget" label="Budget" />');
+
+    expect($html)->not->toContain('x-mask')
+        ->not->toContain('inputmode');
+});
+
+it('pulls the validation message for the field out of the error bag', function () {
+    bindErrors(['email' => ['The email field is required.']]);
+
+    $html = Blade::render('<x-avian::input name="email" label="Email" />');
+
+    expect($html)->toContain('aui-input-invalid')
+        ->toContain('aria-invalid="true"')
+        ->toContain('<span class="aui-error">The email field is required.</span>');
+});
+
+it('resolves bracket names against dotted validation keys', function () {
+    bindErrors(['user.city' => ['The city is invalid.']]);
+
+    expect(Blade::render('<x-avian::input name="user[city]" />'))->toContain('The city is invalid.');
+});
+
+it('reads validation messages from a named error bag', function () {
+    bindErrors(['email' => ['Bag specific message.']], 'register');
+
+    expect(Blade::render('<x-avian::input name="email" error-bag="register" />'))
+        ->toContain('Bag specific message.');
+
+    expect(Blade::render('<x-avian::input name="email" />'))
+        ->not->toContain('Bag specific message.');
+});
+
+it('repopulates an input from old input', function () {
+    session()->flashInput(['email' => 'old@example.com']);
+
+    expect(Blade::render('<x-avian::input name="email" />'))->toContain('value="old@example.com"');
+});
+
+it('leaves the value to livewire when the input is wired', function () {
+    session()->flashInput(['email' => 'old@example.com']);
+
+    expect(Blade::render('<x-avian::input name="email" wire:model="email" />'))
+        ->toContain('wire:model="email"')
+        ->not->toContain('old@example.com');
+});
+
+it('never repopulates password inputs', function () {
+    session()->flashInput(['secret' => 'hunter2']);
+
+    expect(Blade::render('<x-avian::input name="secret" type="password" />'))->not->toContain('hunter2');
+});
+
+it('renders an input group with a prefix, suffix and icon', function () {
+    $html = Blade::render('<x-avian::input name="site" prefix="https://" suffix=".com" icon="fas fa-globe" />');
+
+    expect($html)->toContain('aui-input-group-prefixed')
+        ->toContain('aui-input-group-suffixed')
+        ->toContain('aui-input-group-icon')
+        ->toContain('<span class="aui-input-affix aui-input-affix-prefix">https://</span>')
+        ->toContain('<span class="aui-input-affix aui-input-affix-suffix">.com</span>')
+        ->toContain('aui-input-icon fas fa-globe');
+});
+
+it('renders a bare input without the field wrapper', function () {
+    $html = Blade::render('<x-avian::input name="q" :field="false" placeholder="Search" />');
+
+    expect($html)->toContain('class="aui-input"')
+        ->toContain('placeholder="Search"')
+        ->not->toContain('aui-field');
+});
+
+it('renders a textarea with its value as content', function () {
+    $html = Blade::render('<x-avian::textarea name="notes" label="Notes" :value="\'Hello\'" rows="6" />');
+
+    expect($html)->toContain('class="aui-textarea"')
+        ->toContain('rows="6"')
+        ->toContain('>Hello</textarea>');
+});
+
+it('renders a select with options and marks the selected one', function () {
+    $html = Blade::render(
+        '<x-avian::select name="role" label="Role" placeholder="Choose..." :options="$options" :value="\'admin\'" />',
+        ['options' => ['admin' => 'Administrator', 'user' => 'User']],
+    );
+
+    expect($html)->toContain('class="aui-select"')
+        ->toContain('<option value="">Choose...</option>')
+        ->toContain('<option value="admin" selected>Administrator</option>')
+        ->toContain('<option value="user" >User</option>');
+});
+
+it('marks selected options for a multiple select', function () {
+    $html = Blade::render(
+        '<x-avian::select name="tags[]" multiple :options="$options" :value="$value" />',
+        ['options' => ['a' => 'A', 'b' => 'B'], 'value' => ['b']],
+    );
+
+    expect($html)->toContain('<option value="b" selected>B</option>')
+        ->toContain('<option value="a" >A</option>');
+});
+
+it('renders a searchable select wired to its alpine component', function () {
+    $html = Blade::render(
+        '<x-avian::searchable-select name="role" label="Role" placeholder="Choose..." :options="$options" :value="\'admin\'" />',
+        ['options' => ['admin' => 'Administrator', 'user' => 'User']],
+    );
+
+    expect($html)->toContain('x-data="auiSearchableSelect(')
+        ->toContain('class="aui-field"')
+        ->toContain('aui-select aui-combobox-trigger')
+        ->toContain('>Administrator</span>')
+        ->toContain('aui-combobox-item active')
+        ->toContain('data-label="Administrator"')
+        ->toContain('data-label="User"')
+        ->toContain('type="hidden"')
+        ->toContain('name="role"')
+        ->toContain('value="admin"');
+});
+
+it('shows the placeholder when a searchable select has no selection', function () {
+    $html = Blade::render(
+        '<x-avian::searchable-select name="role" placeholder="Choose a role" :options="$options" />',
+        ['options' => ['admin' => 'Administrator']],
+    );
+
+    expect($html)->toContain('>Choose a role</span>')
+        ->not->toContain('aui-combobox-item active');
+});
+
+it('leaves the searchable select value to livewire when wired', function () {
+    session()->flashInput(['role' => 'admin']);
+
+    $html = Blade::render(
+        '<x-avian::searchable-select name="role" :options="$options" wire:model="role" />',
+        ['options' => ['admin' => 'Administrator']],
+    );
+
+    expect($html)->toContain('wire:model="role"')
+        ->not->toContain('value="admin"');
+});
+
+it('renders custom option markup passed as children instead of the options prop', function () {
+    $html = Blade::render(<<<'BLADE'
+        <x-avian::searchable-select name="item" :value="'a1'">
+            <x-avian::searchable-select.option value="a1" label="Item A1" selected="a1">
+                <strong>Item A1</strong> <small>First batch</small>
+            </x-avian::searchable-select.option>
+            <x-avian::searchable-select.option value="b2" label="Item B2" selected="a1" />
+        </x-avian::searchable-select>
+    BLADE);
+
+    expect($html)->toContain('<strong>Item A1</strong>')
+        ->toContain('<small>First batch</small>')
+        ->toContain('>Item B2</span>')
+        ->toContain('aui-combobox-item active')
+        ->toContain('wire:key="aui-combobox-option-a1"')
+        ->toContain('wire:key="aui-combobox-option-b2"');
+});
+
+it('hands filtering to the server when a search model is given', function () {
+    $html = Blade::render(
+        '<x-avian::searchable-select name="status" wire:model.live="filter.status" :value="$value" :options="$options" search-model="filter.statusSearch" search-debounce="300ms" />',
+        ['options' => ['open' => 'Open'], 'value' => 'open'],
+    );
+
+    expect($html)->toContain('wire:model.live.debounce.300ms="filter.statusSearch"')
+        ->not->toContain('x-model="search"')
+        ->not->toContain('x-on:input="filter()"');
+});
+
+it('shows the empty state for a search model list with no results', function () {
+    $html = Blade::render(
+        '<x-avian::searchable-select name="status" search-model="statusSearch" :options="[]" empty-text="Nothing matched" />',
+    );
+
+    expect($html)->toContain('Nothing matched')
+        ->not->toContain('x-ref="empty"');
+});
+
+it('renders a checkbox with a label and checked state', function () {
+    $html = Blade::render('<x-avian::checkbox name="terms" label="I agree" checked />');
+
+    expect($html)->toContain('class="aui-check"')
+        ->toContain('type="checkbox"')
+        ->toContain('checked="checked"')
+        ->toContain('<span class="aui-check-label">I agree</span>');
+});
+
+it('renders inline radios that share a name', function () {
+    $html = Blade::render('<x-avian::radio name="plan" value="pro" label="Pro" inline />');
+
+    expect($html)->toContain('aui-check aui-check-inline')
+        ->toContain('type="radio"')
+        ->toContain('name="plan"')
+        ->toContain('value="pro"')
+        ->toContain('id="aui-plan-pro"');
+});
+
+it('renders a switch as a checkbox with switch semantics', function () {
+    $html = Blade::render('<x-avian::switch name="active" label="Active" checked />');
+
+    expect($html)->toContain('class="aui-switch"')
+        ->toContain('aui-switch-input')
+        ->toContain('role="switch"')
+        ->toContain('checked="checked"')
+        ->toContain('<span class="aui-switch-track"');
+});
+
+it('renders a file input wired to its alpine component', function () {
+    $html = Blade::render('<x-avian::file name="logo" label="Logo" trigger="Browse" />');
+
+    expect($html)->toContain('x-data="auiFile(')
+        ->toContain('type="file"')
+        ->toContain('x-ref="input"')
+        ->toContain('x-on:change="update($event)"')
+        ->toContain('x-on:click="browse()"')
+        ->toContain('Browse');
+});
+
+it('renders a form with csrf protection and method spoofing', function () {
+    $html = Blade::render('<x-avian::form action="/users/1" method="PUT" files>Fields</x-avian::form>');
+
+    expect($html)->toContain('method="POST"')
+        ->toContain('action="/users/1"')
+        ->toContain('enctype="multipart/form-data"')
+        ->toContain('name="_token"')
+        ->toContain('name="_method" value="PUT"');
+});
+
+it('omits csrf on get forms', function () {
+    expect(Blade::render('<x-avian::form action="/search" method="GET">Fields</x-avian::form>'))
+        ->toContain('method="GET"')
+        ->not->toContain('name="_token"');
+});
+
+it('renders a standalone error component for a field', function () {
+    bindErrors(['email' => ['Invalid email.']]);
+
+    expect(Blade::render('<x-avian::error name="email" />'))
+        ->toContain('<span class="aui-error">Invalid email.</span>');
+
+    expect(Blade::render('<x-avian::error name="name" />'))->toBe('');
+});

@@ -1,0 +1,48 @@
+@props([
+    'name' => null,
+    'id' => null,
+    'value' => null,
+    'label' => null,
+    'hint' => null,
+    'error' => null,
+    'errorBag' => null,
+    'required' => false,
+    'rows' => 4,
+    'field' => true,
+])
+
+@php
+    $avianUi = app(\AvianUi\AvianUi\AvianUi::class);
+
+    $inputError = $error ?? $avianUi->errorFor($name, $errorBag);
+    $inputId = $id ?? (filled($name) ? 'aui-'.str_replace(['[', ']', '.', '_'], '-', trim((string) $name, '[]')) : null);
+
+    $wired = $attributes->whereStartsWith('wire:model')->isNotEmpty();
+    $inputValue = $value;
+
+    if ($inputValue === null && ! $wired) {
+        $inputValue = $avianUi->oldValue($name);
+    }
+@endphp
+
+<x-avian-ui::field
+    :bare="! $field"
+    :label="$label"
+    :for="$inputId"
+    :hint="$hint"
+    :error="$inputError"
+    :required="$required"
+>
+    <textarea
+        {{ $attributes->class([
+            'aui-textarea',
+            'aui-textarea-invalid' => filled($inputError),
+        ])->merge([
+            'name' => $name,
+            'id' => $inputId,
+            'rows' => $rows,
+            'required' => $required,
+            'aria-invalid' => filled($inputError) ? 'true' : null,
+        ]) }}
+    >{{ $inputValue ?? $slot }}</textarea>
+</x-avian-ui::field>

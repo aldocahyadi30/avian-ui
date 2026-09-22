@@ -1,0 +1,74 @@
+/*!
+ * Avian UI - optional theme palettes
+ *
+ * Set data-theme on <html> (or any ancestor) to switch palette:
+ *
+ *     <html data-theme="sky-blue">
+ *
+ * Only --aui-* tokens are set here, so an application that already ships its
+ * own --color-* theme system should skip this file: the base stylesheet picks
+ * those variables up on its own.
+ */
+
+[data-theme="emerald-green"] {
+    --aui-primary: #008d4c;
+    --aui-primary-dark: #007a41;
+    --aui-primary-darker: #006637;
+    --aui-primary-light: #e6f4ed;
+    --aui-primary-50: #f2f9f6;
+    --aui-ring: rgba(0, 141, 76, 0.2);
+}
+
+[data-theme="sky-blue"] {
+    --aui-primary: #00a8d8;
+    --aui-primary-dark: #0092bc;
+    --aui-primary-darker: #007b9e;
+    --aui-primary-light: #e0f5fb;
+    --aui-primary-50: #f0fafd;
+    --aui-ring: rgba(0, 168, 216, 0.2);
+}
+
+[data-theme="steel-blue"] {
+    --aui-primary: #1e8a9c;
+    --aui-primary-dark: #197687;
+    --aui-primary-darker: #146372;
+    --aui-primary-light: #e4f2f4;
+    --aui-primary-50: #f2f9fa;
+    --aui-ring: rgba(30, 138, 156, 0.2);
+}
+
+[data-theme="brown-gold"] {
+    --aui-primary: #b45309;
+    --aui-primary-dark: #9a4708;
+    --aui-primary-darker: #7c3906;
+    --aui-primary-light: #fbeee2;
+    --aui-primary-50: #fdf7f1;
+    --aui-ring: rgba(180, 83, 9, 0.2);
+}
+
+[data-theme="teal-maroon"] {
+    --aui-primary: #0f766e;
+    --aui-primary-dark: #0c635d;
+    --aui-primary-darker: #0a514c;
+    --aui-primary-light: #e2f1f0;
+    --aui-primary-50: #f1f8f7;
+    --aui-ring: rgba(15, 118, 110, 0.2);
+}
+
+[data-theme="golden-yellow"] {
+    --aui-primary: #ca8a04;
+    --aui-primary-dark: #ad7603;
+    --aui-primary-darker: #8d6003;
+    --aui-primary-light: #fcf3dd;
+    --aui-primary-50: #fdf9ee;
+    --aui-ring: rgba(202, 138, 4, 0.2);
+}
+
+[data-theme="navy-blue"] {
+    --aui-primary: #34495e;
+    --aui-primary-dark: #2b3d4e;
+    --aui-primary-darker: #22303e;
+    --aui-primary-light: #e8ecf0;
+    --aui-primary-50: #f4f6f8;
+    --aui-ring: rgba(52, 73, 94, 0.2);
+}

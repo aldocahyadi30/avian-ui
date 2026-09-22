@@ -1,0 +1,117 @@
+---
+name: avian-ui-development
+description: >
+  Build Laravel UI with the Avian Ui Blade component library: asset tags,
+  theming tokens, form controls with validation wiring, paginated tables, and
+  the Alpine-backed modal, dropdown, searchable select and tab components in
+  Blade and Livewire applications.
+license: MIT
+metadata:
+  author: Aldo Octavio Cahyadi
+---
+
+# Avian Ui
+
+Use this skill when a Laravel application needs to build or restyle UI with the
+`aldo-octavio-cahyadi/avian-ui` package.
+
+## Primary Goal
+
+- apply the `aldo-octavio-cahyadi/avian-ui` package's public API in the smallest correct way
+
+## Workflow
+
+### 1. Inspect the Laravel app context
+
+- confirm the package is installed and the layout renders `<x-avian::styles />` and `<x-avian::scripts />`
+- confirm Alpine is available and that `<x-avian::scripts />` runs before it: Livewire loads Alpine at the end of the page, otherwise the app's own Alpine tag must sit below the package script
+- check `config/avian-ui.php` for a custom component `prefix` and for the `assets` strategy
+- check whether the app already defines `--color-primary` and friends before adding theme CSS
+
+### 2. Apply the package's public API
+
+**Assets.** Add the two tags once, in the layout head. The default asset route
+serves the CSS and JS from the package, so nothing needs publishing or
+building. Never add a CDN tag for the package assets.
+
+**Components.** Use the anonymous components rather than hand-written markup:
+
+- general: `button`, `card`, `badge`, `alert`, `table`, `pagination`, `page-header`, `empty`, `avatar`, `progress`, `spinner`, `modal`, `dropdown`, `dropdown-item`, `tabs`, `tab-panel`
+- form: `form`, `field`, `label`, `error`, `hint`, `input`, `textarea`, `select`, `searchable-select`, `checkbox`, `radio`, `switch`, `file`
+
+Form controls render their own label, hint and validation message from `name`,
+and repopulate from old input:
+
+```blade
+<x-avian::input name="email" type="email" label="Email" required />
+<x-avian::select name="role" label="Role" :options="$roles" placeholder="Choose" />
+<x-avian::searchable-select name="country" label="Country" :options="$countries" />
+```
+
+Use `searchable-select` instead of `select` once an option list is too long
+to scan in a native dropdown — it adds a search box and filters client-side by
+default, so it needs no Livewire component of its own. Drop `options` and pass
+`<x-avian::searchable-select.option>` children for custom row markup, or pass
+`search-model` to hand filtering to the server instead (Livewire only, mirrors
+how `wire:model` + `:value` already own the selected value).
+
+Pass `numeric` to `input` for a money-masked amount field
+(`<x-avian::input name="budget" numeric />`) — it renders as a text field
+wired to Alpine's `x-mask:dynamic="$money($input)"`. This requires the
+`@alpinejs/mask` plugin loaded alongside Alpine (loaded before Alpine core,
+same as any Alpine plugin); the package does not bundle it.
+
+Extra attributes pass through to the control, so `wire:model`, `x-on:*` and
+native attributes work unchanged. With `wire:model` the old-input fallback is
+skipped on purpose.
+
+**Paginated tables.** Pass a paginator straight to `table` to render
+Previous/Next and numbered page links underneath it, or render
+`<x-avian::pagination :paginator="$items" />` on its own:
+
+```blade
+<x-avian::table :headers="['Name', 'Role']" :paginator="$users">
+    @foreach ($users as $user)
+        <tr><td>{{ $user->name }}</td><td>{{ $user->role }}</td></tr>
+    @endforeach
+</x-avian::table>
+```
+
+Works with both `paginate()` (numbered links plus a result count) and
+`simplePaginate()` (Previous/Next only).
+
+**Interactive components.** Open a named modal with the button's `modal` prop
+(`<x-avian::button modal="edit">`), from Livewire
+(`$this->dispatch('aui-modal-open', name: 'edit')`) or from JavaScript
+(`window.AvianUI.openModal('edit')`). A hand-written trigger needs its own
+`x-data="{}"` scope before `$dispatch` resolves, because Alpine only
+initialises elements inside an `x-data` tree.
+
+**Styling.** Compose with the `aui-*` classes (`aui-form-grid`, `aui-stack`,
+`aui-row`, `aui-grid`, `aui-form-actions`, `aui-table-align-right`). Override
+design tokens (`--aui-primary`, `--aui-radius-lg`, `--aui-font-sans`) in the
+app's own CSS instead of restyling components with new rules. Pick a bundled
+palette with `data-theme` on `<html>` only when the app has no `--color-*`
+theme system of its own.
+
+## Rules, References, and Templates
+
+Read before executing:
+
+- the package README `Usage` section for the full prop tables and examples
+
+## Examples
+
+- Replace a hand-written form with `<x-avian::form>` plus `<x-avian::input>` controls so labels, hints, required markers and validation messages come from the component instead of repeated markup.
+- Add a Livewire-driven edit dialog by rendering `<x-avian::modal name="edit-user">` once and dispatching `aui-modal-open` from the Livewire component.
+- Swap a long `<x-avian::select>` option list for `<x-avian::searchable-select>` so users can filter it instead of scrolling a native dropdown.
+- Pass a `paginate()` result to `<x-avian::table :paginator="$items">` instead of hand-rolling Previous/Next links.
+- Theme an application by defining `--aui-primary` in the app stylesheet rather than editing the package CSS.
+
+## Anti-patterns
+
+- do not document package internals here; keep the skill focused on adoption in Laravel apps
+- do not bundle or load a second copy of Alpine in a Livewire application
+- do not place `<x-avian::scripts />` after the application's own Alpine tag
+- do not hardcode brand colors in views; use the design tokens
+- do not publish the package views to tweak one component when a prop, a slot or a token override does the job
