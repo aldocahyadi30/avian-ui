@@ -69,6 +69,13 @@
                 <x-avian::button disabled>Disabled</x-avian::button>
                 <x-avian::button href="#" variant="link">Link button</x-avian::button>
             </div>
+
+            <div class="aui-row" style="margin-top: 14px">
+                <x-avian::button icon="fas fa-pen" icon-only label="Edit" variant="light" />
+                <x-avian::button icon="fas fa-trash" icon-only label="Delete" variant="light" />
+                <x-avian::button icon="fas fa-plus" icon-only label="Add" size="sm" />
+                <x-avian::button icon="fas fa-check" icon-only label="Approve" size="lg" variant="success" />
+            </div>
         </x-avian::card>
 
         <x-avian::card title="Badges & status" subtitle="Pills, avatars and progress">
@@ -134,9 +141,9 @@
                         <td><x-avian::badge :variant="$variant" dot>{{ $status }}</x-avian::badge></td>
                         <td class="aui-table-align-right">
                             <x-avian::dropdown align="right" size="sm" label="Actions">
-                                <x-avian::dropdown-item icon="fas fa-pen">Edit</x-avian::dropdown-item>
+                                <x-avian::dropdown.item icon="fas fa-pen">Edit</x-avian::dropdown.item>
                                 <div class="aui-dropdown-divider"></div>
-                                <x-avian::dropdown-item icon="fas fa-trash" danger>Delete</x-avian::dropdown-item>
+                                <x-avian::dropdown.item icon="fas fa-trash" danger>Delete</x-avian::dropdown.item>
                             </x-avian::dropdown>
                         </td>
                     </tr>
@@ -144,12 +151,22 @@
             </x-avian::table>
         </x-avian::card>
 
-        <x-avian::card title="Tabs">
+        <x-avian::card title="Tabs" subtitle="line (default), pill and segmented variants">
             <x-avian::tabs :tabs="['overview' => 'Overview', 'activity' => 'Activity']">
-                <x-avian::tab-panel name="overview">The first panel is shown by default.</x-avian::tab-panel>
-                <x-avian::tab-panel name="activity">
+                <x-avian::tabs.panel name="overview">The first panel is shown by default.</x-avian::tabs.panel>
+                <x-avian::tabs.panel name="activity">
                     <x-avian::empty title="No activity yet" text="Actions will show up here." />
-                </x-avian::tab-panel>
+                </x-avian::tabs.panel>
+            </x-avian::tabs>
+
+            <x-avian::tabs :tabs="['overview' => 'Overview', 'activity' => 'Activity']" variant="pill" style="margin-top: 24px">
+                <x-avian::tabs.panel name="overview">Pill-variant tabs stand alone, no shared underline.</x-avian::tabs.panel>
+                <x-avian::tabs.panel name="activity">Same state, different look.</x-avian::tabs.panel>
+            </x-avian::tabs>
+
+            <x-avian::tabs :tabs="['overview' => 'Overview', 'activity' => 'Activity']" variant="segmented" style="margin-top: 24px">
+                <x-avian::tabs.panel name="overview">Segmented tabs sit inside a grouped track.</x-avian::tabs.panel>
+                <x-avian::tabs.panel name="activity">Same state, different look.</x-avian::tabs.panel>
             </x-avian::tabs>
         </x-avian::card>
     </div>

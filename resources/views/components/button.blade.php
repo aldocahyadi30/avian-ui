@@ -1,3 +1,10 @@
+{{--
+    An `icon-only` button renders as a square button with no visible text —
+    pass `label` so it still gets an accessible name (there is no visible
+    text for assistive tech to read otherwise):
+
+        <x-avian::button icon="fas fa-pen" icon-only label="Edit" />
+--}}
 @props([
     'variant' => 'primary',
     'size' => null,
@@ -5,6 +12,8 @@
     'href' => null,
     'icon' => null,
     'iconRight' => null,
+    'iconOnly' => false,
+    'label' => null,
     'loading' => false,
     'block' => false,
     'disabled' => false,
@@ -26,6 +35,7 @@
         'aui-btn',
         'aui-btn-'.$variant,
         'aui-btn-'.$size => filled($size),
+        'aui-btn-icon' => $iconOnly,
         'aui-btn-block' => $block,
         'aui-btn-loading' => $loading,
     ];
@@ -37,6 +47,7 @@
         'href' => $href,
         'disabled' => $tag === 'button' && ($disabled || $loading),
         'aria-disabled' => $tag === 'a' && ($disabled || $loading) ? 'true' : null,
+        'aria-label' => $iconOnly ? $label : null,
         'x-data' => $opens === null ? null : '{}',
         'x-on:click' => $opens,
     ]) }}
@@ -47,9 +58,11 @@
         <i class="{{ $icon }}" aria-hidden="true"></i>
     @endif
 
-    {{ $slot }}
+    @unless ($iconOnly)
+        {{ $slot }}
 
-    @if (filled($iconRight))
-        <i class="{{ $iconRight }}" aria-hidden="true"></i>
-    @endif
+        @if (filled($iconRight))
+            <i class="{{ $iconRight }}" aria-hidden="true"></i>
+        @endif
+    @endunless
 </{{ $tag }}>

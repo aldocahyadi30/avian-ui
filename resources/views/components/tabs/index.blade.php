@@ -1,6 +1,12 @@
+{{--
+    `variant` styles the tab list itself: omit it (or pass `line`) for the
+    default underlined tabs, `pill` for standalone rounded buttons, or
+    `segmented` for a grouped segmented-control look.
+--}}
 @props([
     'tabs' => [],
     'active' => null,
+    'variant' => null,
 ])
 
 @php
@@ -8,7 +14,10 @@
 @endphp
 
 <div {{ $attributes }} x-data="auiTabs({ active: @js($activeTab) })">
-    <div class="aui-tabs" role="tablist">
+    <div @class([
+        'aui-tabs',
+        'aui-tabs-'.$variant => filled($variant) && $variant !== 'line',
+    ]) role="tablist">
         @foreach ($tabs as $key => $label)
             <button
                 type="button"

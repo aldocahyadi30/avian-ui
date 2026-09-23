@@ -290,9 +290,9 @@ Livewire stays the single source of truth.
                 <td><x-avian::badge variant="success" dot>{{ $user->role }}</x-avian::badge></td>
                 <td class="aui-table-align-right">
                     <x-avian::dropdown align="right" size="sm" label="Actions">
-                        <x-avian::dropdown-item icon="fas fa-pen" :href="route('users.edit', $user)">Edit</x-avian::dropdown-item>
+                        <x-avian::dropdown.item icon="fas fa-pen" :href="route('users.edit', $user)">Edit</x-avian::dropdown.item>
                         <div class="aui-dropdown-divider"></div>
-                        <x-avian::dropdown-item icon="fas fa-trash" danger wire:click="delete({{ $user->id }})">Delete</x-avian::dropdown-item>
+                        <x-avian::dropdown.item icon="fas fa-trash" danger wire:click="delete({{ $user->id }})">Delete</x-avian::dropdown.item>
                     </x-avian::dropdown>
                 </td>
             </tr>
@@ -304,10 +304,19 @@ Livewire stays the single source of truth.
 ```
 
 Available components: `alert`, `avatar`, `badge`, `button`, `card`,
-`dropdown`, `dropdown-item`, `empty`, `page-header`, `pagination`, `progress`,
-`scripts`, `spinner`, `styles`, `table`, `tabs`, `tab-panel`, `modal`, plus
-the form set `form`, `field`, `label`, `error`, `hint`, `input`, `textarea`,
-`select`, `searchable-select`, `checkbox`, `radio`, `switch`, `file`.
+`dropdown` (+ `dropdown.item`), `empty`, `page-header`, `pagination`,
+`progress`, `scripts`, `spinner`, `styles`, `table`, `tabs` (+ `tabs.panel`),
+`modal`, plus the form set `form`, `field`, `label`, `error`, `hint`, `input`,
+`textarea`, `select`, `searchable-select` (+ `searchable-select.option`),
+`checkbox`, `radio`, `switch`, `file`.
+
+Pass `icon-only` for a square, icon-only button (a table row action, a
+toolbar) — it has no visible text, so pass `label` for an accessible name:
+
+```blade
+<x-avian::button icon="fas fa-pen" icon-only label="Edit" size="sm" variant="light" />
+<x-avian::button icon="fas fa-trash" icon-only label="Delete" size="sm" variant="light" wire:click="delete" />
+```
 
 Pass a paginator straight to the table to get Previous/Next and numbered page
 links rendered underneath it:
@@ -366,12 +375,14 @@ $this->dispatch('aui-modal-close', name: 'create-user');
 window.AvianUI.openModal('create-user');
 ```
 
-Tabs keep their state in Alpine:
+Tabs keep their state in Alpine. `variant` styles the tab list itself: omit it
+(or pass `line`) for the default underlined tabs, `pill` for standalone
+rounded buttons, or `segmented` for a grouped segmented-control look:
 
 ```blade
-<x-avian::tabs :tabs="['overview' => 'Overview', 'activity' => 'Activity']">
-    <x-avian::tab-panel name="overview">...</x-avian::tab-panel>
-    <x-avian::tab-panel name="activity">...</x-avian::tab-panel>
+<x-avian::tabs :tabs="['overview' => 'Overview', 'activity' => 'Activity']" variant="segmented">
+    <x-avian::tabs.panel name="overview">...</x-avian::tabs.panel>
+    <x-avian::tabs.panel name="activity">...</x-avian::tabs.panel>
 </x-avian::tabs>
 ```
 

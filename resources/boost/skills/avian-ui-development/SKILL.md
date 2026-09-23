@@ -36,8 +36,8 @@ building. Never add a CDN tag for the package assets.
 
 **Components.** Use the anonymous components rather than hand-written markup:
 
-- general: `button`, `card`, `badge`, `alert`, `table`, `pagination`, `page-header`, `empty`, `avatar`, `progress`, `spinner`, `modal`, `dropdown`, `dropdown-item`, `tabs`, `tab-panel`
-- form: `form`, `field`, `label`, `error`, `hint`, `input`, `textarea`, `select`, `searchable-select`, `checkbox`, `radio`, `switch`, `file`
+- general: `button`, `card`, `badge`, `alert`, `table`, `pagination`, `page-header`, `empty`, `avatar`, `progress`, `spinner`, `modal`, `dropdown` (+ `dropdown.item`), `tabs` (+ `tabs.panel`)
+- form: `form`, `field`, `label`, `error`, `hint`, `input`, `textarea`, `select`, `searchable-select` (+ `searchable-select.option`), `checkbox`, `radio`, `switch`, `file`
 
 Form controls render their own label, hint and validation message from `name`,
 and repopulate from old input:
@@ -60,6 +60,14 @@ Pass `numeric` to `input` for a money-masked amount field
 wired to Alpine's `x-mask:dynamic="$money($input)"`. This requires the
 `@alpinejs/mask` plugin loaded alongside Alpine (loaded before Alpine core,
 same as any Alpine plugin); the package does not bundle it.
+
+Pass `icon-only` to `button` for a square, icon-only button (table row
+actions, a toolbar) — it has no visible text, so it needs `label` for an
+accessible name: `<x-avian::button icon="fas fa-pen" icon-only label="Edit" />`.
+
+Pass `variant` to `tabs` to style the tab list: omit it (or pass `line`) for
+the default underlined tabs, `pill` for standalone rounded buttons, or
+`segmented` for a grouped segmented-control look.
 
 Extra attributes pass through to the control, so `wire:model`, `x-on:*` and
 native attributes work unchanged. With `wire:model` the old-input fallback is

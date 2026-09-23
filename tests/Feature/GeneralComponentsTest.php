@@ -51,6 +51,23 @@ it('lets a caller override the modal trigger handler', function () {
         ->not->toContain('aui-modal-open');
 });
 
+it('renders an icon-only button with an accessible label and no visible text', function () {
+    $html = Blade::render('<x-avian::button icon="fas fa-pen" icon-only label="Edit">Edit</x-avian::button>');
+
+    expect($html)->toContain('aui-btn-icon')
+        ->toContain('aria-label="Edit"')
+        ->toContain('<i class="fas fa-pen"')
+        ->not->toContain('>Edit<');
+});
+
+it('keeps a regular button free of icon-only markup', function () {
+    $html = Blade::render('<x-avian::button icon="fas fa-pen">Edit</x-avian::button>');
+
+    expect($html)->not->toContain('aui-btn-icon')
+        ->not->toContain('aria-label')
+        ->toContain('Edit');
+});
+
 it('renders a card with a title, actions and footer slots', function () {
     $html = Blade::render(<<<'BLADE'
         <x-avian::card title="Team" subtitle="Active members">
@@ -204,8 +221,8 @@ it('renders a modal wired to its alpine component', function () {
 it('renders a dropdown with a default trigger and items', function () {
     $html = Blade::render(<<<'BLADE'
         <x-avian::dropdown label="Actions" align="right">
-            <x-avian::dropdown-item href="/edit" icon="fas fa-pen">Edit</x-avian::dropdown-item>
-            <x-avian::dropdown-item danger>Delete</x-avian::dropdown-item>
+            <x-avian::dropdown.item href="/edit" icon="fas fa-pen">Edit</x-avian::dropdown.item>
+            <x-avian::dropdown.item danger>Delete</x-avian::dropdown.item>
         </x-avian::dropdown>
     BLADE);
 
@@ -221,7 +238,7 @@ it('renders a dropdown with a default trigger and items', function () {
 it('renders tabs with the first tab active by default', function () {
     $html = Blade::render(<<<'BLADE'
         <x-avian::tabs :tabs="['profile' => 'Profile', 'security' => 'Security']">
-            <x-avian::tab-panel name="profile">Profile panel</x-avian::tab-panel>
+            <x-avian::tabs.panel name="profile">Profile panel</x-avian::tabs.panel>
         </x-avian::tabs>
     BLADE);
 
@@ -230,6 +247,20 @@ it('renders tabs with the first tab active by default', function () {
         ->toContain('x-on:click="select(\'security\')"')
         ->toContain('class="aui-tab-panel"')
         ->toContain('x-show="isActive(\'profile\')"');
+});
+
+it('defaults to the plain underlined tab list with no variant class', function () {
+    expect(Blade::render('<x-avian::tabs :tabs="[\'a\' => \'A\']" />'))
+        ->toContain('class="aui-tabs"')
+        ->not->toContain('aui-tabs-line');
+});
+
+it('renders pill and segmented tab variants', function () {
+    expect(Blade::render('<x-avian::tabs :tabs="[\'a\' => \'A\']" variant="pill" />'))
+        ->toContain('class="aui-tabs aui-tabs-pill"');
+
+    expect(Blade::render('<x-avian::tabs :tabs="[\'a\' => \'A\']" variant="segmented" />'))
+        ->toContain('class="aui-tabs aui-tabs-segmented"');
 });
 
 it('renders a progress bar clamped to a percentage', function () {

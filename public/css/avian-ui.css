@@ -1415,6 +1415,57 @@ body.aui-scroll-locked {
     padding-top: 20px;
 }
 
+.aui-tabs-pill {
+    gap: 6px;
+    border-bottom: 0;
+}
+
+.aui-tabs-pill .aui-tab {
+    padding: 8px 16px;
+    border: 0;
+    border-radius: var(--aui-radius-full);
+}
+
+.aui-tabs-pill .aui-tab:hover {
+    background: var(--aui-slate-100);
+}
+
+.aui-tabs-pill .aui-tab-active {
+    background: var(--aui-primary);
+    border-bottom-color: transparent;
+    color: #fff;
+}
+
+.aui-tabs-pill .aui-tab-active:hover {
+    background: var(--aui-primary-dark);
+}
+
+.aui-tabs-segmented {
+    display: inline-flex;
+    gap: 2px;
+    padding: 4px;
+    background: var(--aui-slate-100);
+    border-bottom: 0;
+    border-radius: var(--aui-radius-md);
+}
+
+.aui-tabs-segmented .aui-tab {
+    padding: 7px 16px;
+    border: 0;
+    border-radius: var(--aui-radius-sm);
+}
+
+.aui-tabs-segmented .aui-tab:hover {
+    color: var(--aui-slate-700);
+}
+
+.aui-tabs-segmented .aui-tab-active {
+    background: var(--aui-surface);
+    border-bottom-color: transparent;
+    color: var(--aui-slate-800);
+    box-shadow: var(--aui-shadow-sm);
+}
+
 /* ==========================================================================
    Progress / spinner
    ========================================================================== */
