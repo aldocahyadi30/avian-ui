@@ -4,12 +4,20 @@
     text for assistive tech to read otherwise):
 
         <x-avian::button icon="fas fa-pen" icon-only label="Edit" />
+
+    `navigate` adds `wire:navigate` to an `href` button for Livewire's
+    SPA-style page swap. It is opt-in rather than automatic whenever `href`
+    is set — an external link, a `mailto:`/`tel:` link or an on-page `#anchor`
+    would break under `wire:navigate`, so only ask for it on same-app links:
+
+        <x-avian::button href="{{ route('dashboard') }}" navigate>Dashboard</x-avian::button>
 --}}
 @props([
     'variant' => 'primary',
     'size' => null,
     'type' => 'button',
     'href' => null,
+    'navigate' => false,
     'icon' => null,
     'iconRight' => null,
     'iconOnly' => false,
@@ -45,6 +53,7 @@
     {{ $attributes->class($classes)->merge([
         'type' => $tag === 'button' ? $type : null,
         'href' => $href,
+        'wire:navigate' => $tag === 'a' && $navigate,
         'disabled' => $tag === 'button' && ($disabled || $loading),
         'aria-disabled' => $tag === 'a' && ($disabled || $loading) ? 'true' : null,
         'aria-label' => $iconOnly ? $label : null,

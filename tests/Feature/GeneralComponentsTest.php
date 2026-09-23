@@ -22,6 +22,19 @@ it('renders a button as a link when given an href', function () {
         ->not->toContain('type="button"');
 });
 
+it('adds wire:navigate to a link button only when asked', function () {
+    expect(Blade::render('<x-avian::button href="/reports" navigate>Reports</x-avian::button>'))
+        ->toContain('wire:navigate');
+
+    expect(Blade::render('<x-avian::button href="/reports">Reports</x-avian::button>'))
+        ->not->toContain('wire:navigate');
+});
+
+it('never adds wire:navigate to a plain button', function () {
+    expect(Blade::render('<x-avian::button navigate>Reports</x-avian::button>'))
+        ->not->toContain('wire:navigate');
+});
+
 it('disables a loading button and swaps its icon for a spinner', function () {
     $html = Blade::render('<x-avian::button icon="fas fa-save" loading>Saving</x-avian::button>');
 

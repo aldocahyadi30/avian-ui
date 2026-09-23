@@ -198,6 +198,7 @@ themselves from old input after a failed validation round trip.
 | `options`, `placeholder` | select, searchable-select | Options as `value => label` |
 | `search-placeholder`, `empty-text` | searchable-select | Copy for the search box and empty state |
 | `inline` | checkbox, radio | Lay several out on one line |
+| `mode`, `enable-time`, `date-format`, `min-date`, `max-date` | datepicker | Flatpickr config, read from `data-fp-*` attributes |
 
 `numeric` renders the input as a plain text field wired to Alpine's dynamic
 money mask (`x-mask:dynamic="$money($input)"`), formatting thousands
@@ -269,6 +270,22 @@ All extra attributes land on the control itself, so `wire:model`, `x-on:*`,
 When a control is bound with `wire:model`, the old-input fallback is skipped so
 Livewire stays the single source of truth.
 
+`datepicker` renders a plain text input carrying a `flatpickr-input` hook class
+and `data-fp-*` attributes (`data-fp-mode`, `data-fp-date-format`,
+`data-fp-enable-time`, `data-fp-min-date`, `data-fp-max-date`). Like `numeric`,
+[flatpickr](https://flatpickr.js.org) itself is not bundled by the package —
+the host application loads it and upgrades every `.flatpickr-input` on page
+load (and again after `livewire:navigated`, for a Livewire SPA-style page),
+reading its config out of those `data-fp-*` attributes. Flatpickr marks the
+input `readonly` by default, so it renders with the same dimmed styling as a
+`disabled` field unless the host app's config passes `allowInput: true`:
+
+```blade
+<x-avian::datepicker name="start_date" label="Start date" />
+<x-avian::datepicker name="range" label="Date range" mode="range" />
+<x-avian::datepicker name="datetime" label="Appointment" enable-time date-format="Y-m-d H:i" />
+```
+
 ### 4. General components
 
 ```blade
@@ -308,7 +325,7 @@ Available components: `alert`, `avatar`, `badge`, `button`, `card`,
 `progress`, `scripts`, `spinner`, `styles`, `table`, `tabs` (+ `tabs.panel`),
 `modal`, plus the form set `form`, `field`, `label`, `error`, `hint`, `input`,
 `textarea`, `select`, `searchable-select` (+ `searchable-select.option`),
-`checkbox`, `radio`, `switch`, `file`.
+`checkbox`, `radio`, `switch`, `file`, `datepicker`.
 
 Pass `icon-only` for a square, icon-only button (a table row action, a
 toolbar) — it has no visible text, so pass `label` for an accessible name:
@@ -316,6 +333,15 @@ toolbar) — it has no visible text, so pass `label` for an accessible name:
 ```blade
 <x-avian::button icon="fas fa-pen" icon-only label="Edit" size="sm" variant="light" />
 <x-avian::button icon="fas fa-trash" icon-only label="Delete" size="sm" variant="light" wire:click="delete" />
+```
+
+Pass `navigate` on an `href` button to add `wire:navigate`, for Livewire's
+SPA-style page swap. It is opt-in, not automatic just because `href` is set —
+an external link, a `mailto:`/`tel:` link or an on-page `#anchor` would break
+under `wire:navigate`, so only reach for it on same-app links:
+
+```blade
+<x-avian::button href="{{ route('dashboard') }}" navigate>Dashboard</x-avian::button>
 ```
 
 Pass a paginator straight to the table to get Previous/Next and numbered page

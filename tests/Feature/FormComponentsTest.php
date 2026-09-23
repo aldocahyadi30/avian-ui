@@ -220,6 +220,71 @@ it('shows the empty state for a search model list with no results', function () 
         ->not->toContain('x-ref="empty"');
 });
 
+it('renders a datepicker input with its flatpickr hook attributes', function () {
+    $html = Blade::render('<x-avian::datepicker name="start_date" label="Start date" />');
+
+    expect($html)->toContain('class="aui-field"')
+        ->toContain('<label class="aui-label" for="aui-start-date">Start date</label>')
+        ->toContain('class="aui-input flatpickr-input"')
+        ->toContain('name="start_date"')
+        ->toContain('id="aui-start-date"')
+        ->toContain('data-fp-mode="single"')
+        ->toContain('data-fp-date-format="d/m/Y"')
+        ->not->toContain('data-fp-enable-time')
+        ->not->toContain('data-fp-min-date')
+        ->not->toContain('data-fp-max-date');
+});
+
+it('renders a datepicker with range, time and bounds options', function () {
+    $html = Blade::render(
+        '<x-avian::datepicker name="range" mode="range" enable-time date-format="Y-m-d H:i" min-date="2024-01-01" max-date="2024-12-31" />',
+    );
+
+    expect($html)->toContain('data-fp-mode="range"')
+        ->toContain('data-fp-date-format="Y-m-d H:i"')
+        ->toContain('data-fp-enable-time="true"')
+        ->toContain('data-fp-min-date="2024-01-01"')
+        ->toContain('data-fp-max-date="2024-12-31"');
+});
+
+it('pulls the validation message for the datepicker out of the error bag', function () {
+    bindErrors(['start_date' => ['The start date field is required.']]);
+
+    $html = Blade::render('<x-avian::datepicker name="start_date" label="Start date" />');
+
+    expect($html)->toContain('aui-input-invalid')
+        ->toContain('aria-invalid="true"')
+        ->toContain('<span class="aui-error">The start date field is required.</span>');
+});
+
+it('repopulates a datepicker from old input', function () {
+    session()->flashInput(['start_date' => '01/06/2024']);
+
+    expect(Blade::render('<x-avian::datepicker name="start_date" />'))->toContain('value="01/06/2024"');
+});
+
+it('leaves the datepicker value to livewire when wired', function () {
+    session()->flashInput(['start_date' => '01/06/2024']);
+
+    expect(Blade::render('<x-avian::datepicker name="start_date" wire:model="startDate" />'))
+        ->toContain('wire:model="startDate"')
+        ->not->toContain('01/06/2024');
+});
+
+it('renders a disabled datepicker', function () {
+    $html = Blade::render('<x-avian::datepicker name="start_date" :disabled="true" />');
+
+    expect($html)->toContain('disabled="disabled"');
+});
+
+it('renders a bare datepicker without the field wrapper', function () {
+    $html = Blade::render('<x-avian::datepicker name="start_date" :field="false" placeholder="Select date" />');
+
+    expect($html)->toContain('class="aui-input flatpickr-input"')
+        ->toContain('placeholder="Select date"')
+        ->not->toContain('aui-field');
+});
+
 it('renders a checkbox with a label and checked state', function () {
     $html = Blade::render('<x-avian::checkbox name="terms" label="I agree" checked />');
 

@@ -242,6 +242,23 @@
                 left: 0,
                 width: 0,
 
+                /* Seeds come from data-* attributes rather than the x-data
+                   expression, so it stays constant across Livewire morphs
+                   and Alpine never re-initialises (and forgets) the cache. */
+                init: function () {
+                    var dataset = this.$el.dataset;
+
+                    if (dataset.auiValue) {
+                        this.localValue = dataset.auiValue;
+                    }
+
+                    if (dataset.auiLabels) {
+                        try {
+                            Object.assign(this.labels, JSON.parse(dataset.auiLabels));
+                        } catch (e) {}
+                    }
+                },
+
                 /* Read through $wire so a server-side change reaches the
                    label too; falls back to local state when there is no
                    wire:model. */

@@ -37,7 +37,7 @@ building. Never add a CDN tag for the package assets.
 **Components.** Use the anonymous components rather than hand-written markup:
 
 - general: `button`, `card`, `badge`, `alert`, `table`, `pagination`, `page-header`, `empty`, `avatar`, `progress`, `spinner`, `modal`, `dropdown` (+ `dropdown.item`), `tabs` (+ `tabs.panel`)
-- form: `form`, `field`, `label`, `error`, `hint`, `input`, `textarea`, `select`, `searchable-select` (+ `searchable-select.option`), `checkbox`, `radio`, `switch`, `file`
+- form: `form`, `field`, `label`, `error`, `hint`, `input`, `textarea`, `select`, `searchable-select` (+ `searchable-select.option`), `checkbox`, `radio`, `switch`, `file`, `datepicker`
 
 Form controls render their own label, hint and validation message from `name`,
 and repopulate from old input:
@@ -61,9 +61,21 @@ wired to Alpine's `x-mask:dynamic="$money($input)"`. This requires the
 `@alpinejs/mask` plugin loaded alongside Alpine (loaded before Alpine core,
 same as any Alpine plugin); the package does not bundle it.
 
+`datepicker` renders a plain text input carrying a `flatpickr-input` hook
+class and `data-fp-*` attributes (`mode`, `enable-time`, `date-format`,
+`min-date`, `max-date`):
+`<x-avian::datepicker name="start_date" label="Start date" />`. Like
+`numeric`, [flatpickr](https://flatpickr.js.org) is not bundled — the host
+app loads it and upgrades every `.flatpickr-input` on page load, reading its
+config from the `data-fp-*` attributes.
+
 Pass `icon-only` to `button` for a square, icon-only button (table row
 actions, a toolbar) — it has no visible text, so it needs `label` for an
 accessible name: `<x-avian::button icon="fas fa-pen" icon-only label="Edit" />`.
+
+Pass `navigate` to a `button` with `href` to add `wire:navigate` (Livewire
+SPA-style page swap). It is opt-in, not automatic just because `href` is set —
+never add it for an external link, `mailto:`/`tel:`, or an on-page `#anchor`.
 
 Pass `variant` to `tabs` to style the tab list: omit it (or pass `line`) for
 the default underlined tabs, `pill` for standalone rounded buttons, or

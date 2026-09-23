@@ -614,6 +614,17 @@
     cursor: not-allowed;
 }
 
+/*
+ * Flatpickr marks its input readonly to route typing through the calendar
+ * popup rather than the keyboard — that's not the "locked field" the shared
+ * [readonly] rule above is for, so it keeps the normal, non-dimmed input look.
+ */
+.aui-input.flatpickr-input[readonly]:not(:disabled) {
+    background: var(--aui-surface);
+    color: var(--aui-slate-800);
+    cursor: pointer;
+}
+
 .aui-textarea {
     height: auto;
     min-height: 92px;
@@ -836,6 +847,15 @@
 
 .aui-combobox-item + .aui-combobox-item {
     margin-top: 2px;
+}
+
+/*
+ * `display: flex` above matches the [hidden] UA default's specificity, and
+ * an author rule wins that tie regardless of order — so the client-side
+ * filter's `item.hidden = true` needs this to actually hide a filtered-out row.
+ */
+.aui-combobox-item[hidden] {
+    display: none;
 }
 
 .aui-combobox-item:hover,
