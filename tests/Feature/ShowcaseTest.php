@@ -14,7 +14,8 @@ it('renders every component together on the workbench showcase', function () {
         ->toContain('aui-table')
         ->toContain('auiModal(')
         ->toContain('auiTabs(')
-        ->toContain('auiDropdown()')
+        ->toContain('auiDropdown({')
+        ->toContain('auiMultiSelect(')
         ->toContain('avian-ui/css/avian-ui.css')
         ->toContain('avian-ui/js/avian-ui.js');
 });

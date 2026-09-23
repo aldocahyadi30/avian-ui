@@ -110,6 +110,13 @@
                         placeholder="Choose a country"
                         :options="['us' => 'United States', 'id' => 'Indonesia', 'jp' => 'Japan', 'de' => 'Germany']"
                     />
+                    <x-avian::multi-select
+                        name="skills"
+                        label="Skills"
+                        placeholder="Pick a few skills"
+                        :options="['php' => 'PHP', 'laravel' => 'Laravel', 'js' => 'JavaScript', 'css' => 'CSS', 'sql' => 'SQL', 'go' => 'Go']"
+                        :value="['php', 'laravel']"
+                    />
                     <x-avian::input name="budget" label="Budget" prefix="Rp" numeric hint="Rounded to the nearest thousand." />
                     <x-avian::file name="attachment" label="Attachment" />
                     <x-avian::textarea class="aui-form-full" name="notes" label="Notes" rows="3" />

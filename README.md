@@ -195,8 +195,9 @@ themselves from old input after a failed validation round trip.
 | `size` | input, select | `sm` or `lg` |
 | `prefix`, `suffix`, `icon` | input | Input group affixes |
 | `numeric` | input | Money-masked text field (see below) |
-| `options`, `placeholder` | select, searchable-select | Options as `value => label` |
-| `search-placeholder`, `empty-text` | searchable-select | Copy for the search box and empty state |
+| `options`, `placeholder` | select, searchable-select, multi-select | Options as `value => label` |
+| `search-placeholder`, `empty-text` | searchable-select, multi-select | Copy for the search box and empty state |
+| `max` | multi-select | Cap how many values can be picked |
 | `inline` | checkbox, radio | Lay several out on one line |
 | `mode`, `enable-time`, `date-format`, `min-date`, `max-date` | datepicker | Flatpickr config, read from `data-fp-*` attributes |
 
@@ -258,6 +259,38 @@ it already owns the selected value through `wire:model` + `:value`:
     :options="$this->statusOptions"
     search-model="filter.statusSearch"
 />
+```
+
+`multi-select` is the multiple-choice version of `searchable-select`: the same
+searchable dropdown, with each pick shown as a removable chip in the trigger.
+The dropdown stays open while picking, and Backspace in an empty search box
+removes the last chip. Values submit as `name[]`, so the request receives an
+array, and validation messages for both `tags` and `tags.*` are shown:
+
+```blade
+<x-avian::multi-select
+    name="tags"
+    label="Tags"
+    placeholder="Pick a few tags"
+    :options="['php' => 'PHP', 'js' => 'JavaScript', 'go' => 'Go']"
+    :value="['php']"
+    max="3"
+/>
+```
+
+With Livewire, `wire:model` binds the whole array (through Alpine's
+`x-modelable`), so `.live` and the other modifiers work as usual. Drop
+`options` and pass `<x-avian::multi-select.option>` children for custom row
+markup:
+
+```blade
+<x-avian::multi-select wire:model.live="userIds">
+    @foreach ($users as $user)
+        <x-avian::multi-select.option :value="$user->id" :label="$user->name" :selected="$userIds">
+            <strong>{{ $user->name }}</strong> <small>{{ $user->email }}</small>
+        </x-avian::multi-select.option>
+    @endforeach
+</x-avian::multi-select>
 ```
 
 All extra attributes land on the control itself, so `wire:model`, `x-on:*`,

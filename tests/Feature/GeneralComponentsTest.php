@@ -239,7 +239,9 @@ it('renders a dropdown with a default trigger and items', function () {
         </x-avian::dropdown>
     BLADE);
 
-    expect($html)->toContain('x-data="auiDropdown()"')
+    expect($html)->toContain("x-data=\"auiDropdown({ align: 'right' })\"")
+        ->toContain('x-ref="trigger"')
+        ->toContain('x-ref="menu"')
         ->toContain('x-on:click.outside="hide()"')
         ->toContain('aui-dropdown-menu aui-dropdown-menu-right')
         ->toContain('Actions')

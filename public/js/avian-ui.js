@@ -158,13 +158,77 @@
             return {
                 open: config.open === true,
                 closeOnSelect: config.closeOnSelect !== false,
+                align: config.align || 'left',
+                top: 0,
+                left: 0,
+
+                /* The menu is position: fixed so a scrolling ancestor (a table
+                   wrapper, a card) cannot clip it. Scroll events don't bubble,
+                   so listen in the capture phase to follow any scroller. */
+                init: function () {
+                    var self = this;
+
+                    this.follow = function () {
+                        if (self.open) {
+                            self.reposition();
+                        }
+                    };
+
+                    window.addEventListener('scroll', this.follow, true);
+                    window.addEventListener('resize', this.follow);
+
+                    if (this.open) {
+                        this.$nextTick(function () {
+                            self.reposition();
+                        });
+                    }
+                },
+
+                destroy: function () {
+                    window.removeEventListener('scroll', this.follow, true);
+                    window.removeEventListener('resize', this.follow);
+                },
+
+                reposition: function () {
+                    var trigger = this.$refs.trigger;
+                    var menu = this.$refs.menu;
+
+                    if (! trigger || ! menu) {
+                        return;
+                    }
+
+                    var rect = trigger.getBoundingClientRect();
+                    var width = menu.offsetWidth;
+                    var height = menu.offsetHeight;
+                    var top = rect.bottom + 6;
+                    var left = this.align === 'right' ? rect.right - width : rect.left;
+
+                    /* Open upwards when there is no room below but there is above. */
+                    if (top + height > window.innerHeight && rect.top - 6 - height >= 0) {
+                        top = rect.top - 6 - height;
+                    }
+
+                    this.top = top;
+                    this.left = Math.max(4, Math.min(left, window.innerWidth - width - 4));
+                },
 
                 toggle: function () {
-                    this.open = ! this.open;
+                    if (this.open) {
+                        this.hide();
+                    } else {
+                        this.show();
+                    }
                 },
 
                 show: function () {
+                    var self = this;
+
                     this.open = true;
+
+                    /* Measure once the menu is displayed. */
+                    this.$nextTick(function () {
+                        self.reposition();
+                    });
                 },
 
                 hide: function () {
@@ -399,6 +463,230 @@
                 chooseHighlighted: function () {
                     var items = this.visibleItems();
                     var item = (this.$refs.list && this.$refs.list.querySelector('.aui-combobox-item.is-highlighted')) || items[0];
+
+                    if (item) {
+                        item.click();
+                    }
+                },
+            };
+        },
+
+        /** Searchable select that picks several values. */
+        auiMultiSelect: function (config) {
+            config = config || {};
+
+            return {
+                open: false,
+                search: '',
+                values: [],
+                labels: {},
+                max: config.max || null,
+
+                top: 0,
+                left: 0,
+                width: 0,
+
+                /* Seeds come from data-* attributes so the x-data expression
+                   stays constant across Livewire morphs. Scroll listening
+                   runs in the capture phase, so the dropdown also follows a
+                   scrolling ancestor such as a table wrapper. */
+                init: function () {
+                    var self = this;
+                    var dataset = this.$el.dataset;
+
+                    try {
+                        Object.assign(this.labels, JSON.parse(dataset.auiLabels || '{}'));
+                    } catch (e) {}
+
+                    try {
+                        this.values = this.normalize(JSON.parse(dataset.auiValues || '[]'));
+                    } catch (e) {}
+
+                    this.follow = function () {
+                        if (self.open) {
+                            self.reposition();
+                        }
+                    };
+
+                    window.addEventListener('scroll', this.follow, true);
+                    window.addEventListener('resize', this.follow);
+
+                    /* x-modelable hands over whatever the server holds. */
+                    this.$watch('values', function (value) {
+                        if (! Array.isArray(value)) {
+                            self.values = self.normalize(value);
+                        }
+                    });
+                },
+
+                destroy: function () {
+                    window.removeEventListener('scroll', this.follow, true);
+                    window.removeEventListener('resize', this.follow);
+                },
+
+                normalize: function (value) {
+                    if (value === null || value === undefined || value === '') {
+                        return [];
+                    }
+
+                    var list = Array.isArray(value) ? value : (typeof value === 'object' ? Object.values(value) : [value]);
+
+                    return list.map(String).filter(function (item, index, all) {
+                        return item !== '' && all.indexOf(item) === index;
+                    });
+                },
+
+                remember: function (value, label) {
+                    if (value === null || value === '' || label === null || label === undefined) {
+                        return;
+                    }
+
+                    this.labels[String(value)] = label;
+                },
+
+                labelFor: function (value) {
+                    return this.labels[String(value)] ?? String(value);
+                },
+
+                isSelected: function (value) {
+                    return Array.isArray(this.values) && this.values.indexOf(String(value)) !== -1;
+                },
+
+                toggleValue: function (value, label) {
+                    value = String(value);
+                    this.remember(value, label);
+
+                    if (this.isSelected(value)) {
+                        this.remove(value);
+                    } else if (! this.max || this.values.length < this.max) {
+                        this.values = this.values.concat([value]);
+                    }
+
+                    this.changed();
+                },
+
+                remove: function (value) {
+                    value = String(value);
+
+                    this.values = this.values.filter(function (item) {
+                        return item !== value;
+                    });
+
+                    this.changed();
+                },
+
+                clear: function () {
+                    this.values = [];
+                    this.changed();
+                },
+
+                /* Chips can wrap onto a new line and move the trigger's
+                   bottom edge, so re-anchor the dropdown after each change. */
+                changed: function () {
+                    var self = this;
+
+                    this.$dispatch('aui-multiselect-changed', { values: this.values.slice() });
+
+                    this.$nextTick(function () {
+                        if (self.open) {
+                            self.reposition();
+
+                            if (self.$refs.search) {
+                                self.$refs.search.focus();
+                            }
+                        }
+                    });
+                },
+
+                items: function () {
+                    return this.$refs.list ? Array.from(this.$refs.list.querySelectorAll('.aui-combobox-item')) : [];
+                },
+
+                visibleItems: function () {
+                    return this.items().filter(function (item) {
+                        return ! item.hidden;
+                    });
+                },
+
+                filter: function () {
+                    var term = this.search.trim().toLowerCase();
+
+                    this.items().forEach(function (item) {
+                        var text = (item.dataset.label || item.textContent || '').toLowerCase();
+                        item.hidden = term !== '' && text.indexOf(term) === -1;
+                        item.classList.remove('is-highlighted');
+                    });
+
+                    if (this.$refs.empty) {
+                        this.$refs.empty.hidden = this.visibleItems().length > 0;
+                    }
+                },
+
+                reposition: function () {
+                    var rect = this.$refs.trigger.getBoundingClientRect();
+                    var height = this.$refs.dropdown ? this.$refs.dropdown.offsetHeight : 0;
+                    var top = rect.bottom + 6;
+
+                    /* Open upwards when there is no room below but there is above. */
+                    if (top + height > window.innerHeight && rect.top - 6 - height >= 0) {
+                        top = rect.top - 6 - height;
+                    }
+
+                    this.top = top;
+                    this.left = rect.left;
+                    this.width = rect.width;
+                },
+
+                toggle: function () {
+                    if (this.open) {
+                        this.close();
+
+                        return;
+                    }
+
+                    var self = this;
+
+                    this.reposition();
+                    this.open = true;
+                    this.search = '';
+                    this.filter();
+
+                    this.$nextTick(function () {
+                        self.reposition();
+
+                        if (self.$refs.search) {
+                            self.$refs.search.focus();
+                        }
+                    });
+                },
+
+                close: function () {
+                    this.open = false;
+                },
+
+                move: function (step) {
+                    var items = this.visibleItems();
+
+                    if (! items.length) {
+                        return;
+                    }
+
+                    var current = items.findIndex(function (item) {
+                        return item.classList.contains('is-highlighted');
+                    });
+                    var next = current === -1
+                        ? (step > 0 ? 0 : items.length - 1)
+                        : (current + step + items.length) % items.length;
+
+                    items.forEach(function (item) {
+                        item.classList.remove('is-highlighted');
+                    });
+                    items[next].classList.add('is-highlighted');
+                    items[next].scrollIntoView({ block: 'nearest' });
+                },
+
+                chooseHighlighted: function () {
+                    var item = this.$refs.list && this.$refs.list.querySelector('.aui-combobox-item.is-highlighted');
 
                     if (item) {
                         item.click();

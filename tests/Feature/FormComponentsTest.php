@@ -220,6 +220,91 @@ it('shows the empty state for a search model list with no results', function () 
         ->not->toContain('x-ref="empty"');
 });
 
+it('renders a multi select with chips, options and array input names', function () {
+    $html = Blade::render(
+        '<x-avian::multi-select name="tags" label="Tags" :options="$options" :value="[\'php\', \'go\']" />',
+        ['options' => ['php' => 'PHP', 'js' => 'JavaScript', 'go' => 'Go']],
+    );
+
+    expect($html)->toContain('x-data="auiMultiSelect(')
+        ->toContain('x-modelable="values"')
+        ->toContain('<label class="aui-label" for="aui-tags">Tags</label>')
+        ->toContain('aui-select aui-combobox-trigger aui-multiselect-trigger')
+        ->toContain('data-aui-values="[&quot;php&quot;,&quot;go&quot;]"')
+        ->toContain('name="tags[]"')
+        ->toContain('aria-multiselectable="true"')
+        ->toContain('<span class="aui-multiselect-chip">PHP</span>')
+        ->toContain('<span class="aui-multiselect-chip">Go</span>')
+        ->toContain('wire:key="aui-multiselect-option-js"')
+        ->toContain('data-label="JavaScript"');
+
+    expect(substr_count($html, 'aui-combobox-item active'))->toBe(2);
+});
+
+it('keeps an explicit array suffix on the multi select name', function () {
+    $html = Blade::render('<x-avian::multi-select name="tags[]" :options="[\'a\' => \'A\']" />');
+
+    expect($html)->toContain('name="tags[]"')
+        ->not->toContain('tags[][]')
+        ->toContain('id="aui-tags"');
+});
+
+it('repopulates the multi select from old input', function () {
+    session()->flashInput(['tags' => ['js']]);
+
+    $html = Blade::render(
+        '<x-avian::multi-select name="tags" :options="$options" />',
+        ['options' => ['php' => 'PHP', 'js' => 'JavaScript']],
+    );
+
+    expect($html)->toContain('data-aui-values="[&quot;js&quot;]"')
+        ->toContain('<span class="aui-multiselect-chip">JavaScript</span>');
+});
+
+it('shows the multi select placeholder when nothing is picked', function () {
+    $html = Blade::render('<x-avian::multi-select name="tags" placeholder="Pick tags" :options="[\'a\' => \'A\']" />');
+
+    expect($html)->toContain('data-aui-values="[]"')
+        ->toContain('>Pick tags</span>')
+        ->not->toContain('aui-combobox-item active');
+});
+
+it('binds the multi select to livewire through x-modelable', function () {
+    session()->flashInput(['tags' => ['a']]);
+
+    $html = Blade::render('<x-avian::multi-select name="tags" wire:model.live="tags" :options="[\'a\' => \'A\']" />');
+
+    expect($html)->toContain('x-modelable="values"')
+        ->toContain('wire:model.live="tags"')
+        ->toContain('data-aui-values="[]"');
+});
+
+it('shows item level validation messages on the multi select', function () {
+    bindErrors(['tags.1' => ['The selected tag is invalid.']]);
+
+    $html = Blade::render('<x-avian::multi-select name="tags" :options="[\'a\' => \'A\']" />');
+
+    expect($html)->toContain('The selected tag is invalid.')
+        ->toContain('aui-select-invalid')
+        ->toContain('aria-invalid="true"');
+});
+
+it('renders custom multi select option markup passed as children', function () {
+    $html = Blade::render(<<<'BLADE'
+        <x-avian::multi-select name="users" :value="['1']">
+            <x-avian::multi-select.option value="1" label="Ada" :selected="['1']">
+                <strong>Ada</strong> <small>ada@example.com</small>
+            </x-avian::multi-select.option>
+            <x-avian::multi-select.option value="2" label="Grace" :selected="['1']" />
+        </x-avian::multi-select>
+    BLADE);
+
+    expect($html)->toContain('<small>ada@example.com</small>')
+        ->toContain('>Grace</span>')
+        ->toContain('x-on:click="toggleValue(')
+        ->toContain('aui-combobox-item active');
+});
+
 it('renders a datepicker input with its flatpickr hook attributes', function () {
     $html = Blade::render('<x-avian::datepicker name="start_date" label="Start date" />');
 

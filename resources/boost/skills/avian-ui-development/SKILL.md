@@ -3,7 +3,7 @@ name: avian-ui-development
 description: >
   Build Laravel UI with the Avian Ui Blade component library: asset tags,
   theming tokens, form controls with validation wiring, paginated tables, and
-  the Alpine-backed modal, dropdown, searchable select and tab components in
+  the Alpine-backed modal, dropdown, searchable select, multi select and tab components in
   Blade and Livewire applications.
 license: MIT
 metadata:
@@ -37,7 +37,7 @@ building. Never add a CDN tag for the package assets.
 **Components.** Use the anonymous components rather than hand-written markup:
 
 - general: `button`, `card`, `badge`, `alert`, `table`, `pagination`, `page-header`, `empty`, `avatar`, `progress`, `spinner`, `modal`, `dropdown` (+ `dropdown.item`), `tabs` (+ `tabs.panel`)
-- form: `form`, `field`, `label`, `error`, `hint`, `input`, `textarea`, `select`, `searchable-select` (+ `searchable-select.option`), `checkbox`, `radio`, `switch`, `file`, `datepicker`
+- form: `form`, `field`, `label`, `error`, `hint`, `input`, `textarea`, `select`, `searchable-select` (+ `searchable-select.option`), `multi-select` (+ `multi-select.option`), `checkbox`, `radio`, `switch`, `file`, `datepicker`
 
 Form controls render their own label, hint and validation message from `name`,
 and repopulate from old input:
@@ -46,6 +46,7 @@ and repopulate from old input:
 <x-avian::input name="email" type="email" label="Email" required />
 <x-avian::select name="role" label="Role" :options="$roles" placeholder="Choose" />
 <x-avian::searchable-select name="country" label="Country" :options="$countries" />
+<x-avian::multi-select name="tags" label="Tags" :options="$tags" :value="$post->tag_ids" />
 ```
 
 Use `searchable-select` instead of `select` once an option list is too long
@@ -54,6 +55,10 @@ default, so it needs no Livewire component of its own. Drop `options` and pass
 `<x-avian::searchable-select.option>` children for custom row markup, or pass
 `search-model` to hand filtering to the server instead (Livewire only, mirrors
 how `wire:model` + `:value` already own the selected value).
+
+Use `multi-select` when several values can be picked. It submits `name[]` (an
+array: validate `tags` and `tags.*`), shows picks as removable chips, accepts
+`max`, and binds the whole array with `wire:model` through `x-modelable`.
 
 Pass `numeric` to `input` for a money-masked amount field
 (`<x-avian::input name="budget" numeric />`) — it renders as a text field
@@ -125,6 +130,7 @@ Read before executing:
 - Replace a hand-written form with `<x-avian::form>` plus `<x-avian::input>` controls so labels, hints, required markers and validation messages come from the component instead of repeated markup.
 - Add a Livewire-driven edit dialog by rendering `<x-avian::modal name="edit-user">` once and dispatching `aui-modal-open` from the Livewire component.
 - Swap a long `<x-avian::select>` option list for `<x-avian::searchable-select>` so users can filter it instead of scrolling a native dropdown.
+- Replace a `<select multiple>` with `<x-avian::multi-select>` so users can search the options and see their picks as chips.
 - Pass a `paginate()` result to `<x-avian::table :paginator="$items">` instead of hand-rolling Previous/Next links.
 - Theme an application by defining `--aui-primary` in the app stylesheet rather than editing the package CSS.
 
