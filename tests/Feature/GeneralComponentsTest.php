@@ -139,6 +139,40 @@ it('renders a table with headers and rows', function () {
         ->toContain('<td>Ada</td>');
 });
 
+it('renders an empty state spanning every column when a table has no rows', function () {
+    $html = Blade::render('<x-avian::table :headers="[\'Name\', \'Role\', \'\']">@foreach ([] as $row)<tr><td>{{ $row }}</td></tr>@endforeach</x-avian::table>');
+
+    expect($html)->toContain('class="aui-table-empty"')
+        ->toContain('colspan="3"')
+        ->toContain('class="aui-empty"')
+        ->toContain('No data found');
+});
+
+it('renders a custom empty title, text and icon on a table', function () {
+    $html = Blade::render('<x-avian::table :headers="[\'Name\']" empty="No users yet" empty-text="Invite someone to get started." empty-icon="fas fa-users"></x-avian::table>');
+
+    expect($html)->toContain('No users yet')
+        ->toContain('Invite someone to get started.')
+        ->toContain('fas fa-users')
+        ->not->toContain('No data found');
+});
+
+it('renders an empty slot on a table in place of the default empty state', function () {
+    $html = Blade::render('<x-avian::table :columns="4"><x-slot:empty><p>Nothing here</p></x-slot:empty></x-avian::table>');
+
+    expect($html)->toContain('colspan="4"')
+        ->toContain('<p>Nothing here</p>')
+        ->not->toContain('class="aui-empty"');
+});
+
+it('skips the empty state on a table when it is disabled or has rows', function () {
+    $disabled = Blade::render('<x-avian::table :headers="[\'Name\']" :empty="false"></x-avian::table>');
+    $filled = Blade::render('<x-avian::table :headers="[\'Name\']"><tr><td>Ada</td></tr></x-avian::table>');
+
+    expect($disabled)->not->toContain('aui-table-empty')
+        ->and($filled)->not->toContain('aui-table-empty');
+});
+
 it('renders pagination links for a length-aware paginator', function () {
     $paginator = new LengthAwarePaginator(
         items: ['Ada', 'Grace'],

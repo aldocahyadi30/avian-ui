@@ -105,6 +105,10 @@ Previous/Next and numbered page links underneath it, or render
 Works with both `paginate()` (numbered links plus a result count) and
 `simplePaginate()` (Previous/Next only).
 
+With no rows, `table` renders an empty state across every column. Set
+`empty`, `empty-text`, `empty-icon`, pass an `empty` slot, or disable it with
+`:empty="false"`; pass `:columns` when the header comes from a `head` slot.
+
 **Interactive components.** Open a named modal with the button's `modal` prop
 (`<x-avian::button modal="edit">`), from Livewire
 (`$this->dispatch('aui-modal-open', name: 'edit')`) or from JavaScript

@@ -334,7 +334,7 @@ input `readonly` by default, so it renders with the same dimmed styling as a
 
 <x-avian::card title="Members" subtitle="Active this month" :padded="false">
     <x-avian::table :headers="['Name', 'Role', '']">
-        @forelse ($users as $user)
+        @foreach ($users as $user)
             <tr>
                 <td>{{ $user->name }}</td>
                 <td><x-avian::badge variant="success" dot>{{ $user->role }}</x-avian::badge></td>
@@ -346,9 +346,7 @@ input `readonly` by default, so it renders with the same dimmed styling as a
                     </x-avian::dropdown>
                 </td>
             </tr>
-        @empty
-            <tr><td colspan="3"><x-avian::empty title="No users yet" /></td></tr>
-        @endforelse
+        @endforeach
     </x-avian::table>
 </x-avian::card>
 ```
@@ -395,6 +393,22 @@ links rendered underneath it:
 Z results" summary) or `simplePaginate()` (Previous/Next only). The same
 markup is available on its own as `<x-avian::pagination :paginator="$users" />`
 for a paginator you render outside a table.
+
+When the table has no rows it renders an empty state spanning every column
+("No data found" by default). Customize it with `empty`, `empty-text` and
+`empty-icon`, replace it entirely with an `empty` slot, or turn it off with
+`:empty="false"`:
+
+```blade
+<x-avian::table :headers="['Name', 'Role']" empty="No users yet" empty-text="Invite someone to get started.">
+    @foreach ($users as $user)
+        <tr><td>{{ $user->name }}</td><td>{{ $user->role }}</td></tr>
+    @endforeach
+</x-avian::table>
+```
+
+The colspan comes from `headers`; when you build the header with a `head`
+slot instead, pass `:columns="3"` so the empty row spans the whole table.
 
 ### 5. Modals, dropdowns and tabs
 

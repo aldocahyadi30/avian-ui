@@ -1247,6 +1247,14 @@
     color: var(--aui-text-muted);
 }
 
+.aui-table-hover tbody tr.aui-table-empty:hover {
+    background: transparent;
+}
+
+.aui-table-empty .aui-empty {
+    padding: 0;
+}
+
 /* ==========================================================================
    Pagination
    ========================================================================== */

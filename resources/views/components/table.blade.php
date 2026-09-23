@@ -4,7 +4,16 @@
     'striped' => false,
     'size' => null,
     'paginator' => null,
+    'empty' => null,
+    'emptyText' => null,
+    'emptyIcon' => 'fas fa-inbox',
+    'columns' => null,
 ])
+
+@php
+    $showEmpty = $empty !== false && $slot->isEmpty();
+    $emptyColumns = $columns ?? max(count($headers), 1);
+@endphp
 
 <div class="aui-table-wrap">
     <table {{ $attributes->class([
@@ -28,7 +37,23 @@
         @endif
 
         <tbody>
-            {{ $slot }}
+            @if ($showEmpty)
+                <tr class="aui-table-empty">
+                    <td colspan="{{ $emptyColumns }}">
+                        @if ($empty instanceof \Illuminate\View\ComponentSlot)
+                            {{ $empty }}
+                        @else
+                            <x-avian-ui::empty
+                                :icon="$emptyIcon"
+                                :title="$empty ?? __('avian-ui::messages.no_results')"
+                                :text="$emptyText"
+                            />
+                        @endif
+                    </td>
+                </tr>
+            @else
+                {{ $slot }}
+            @endif
         </tbody>
 
         @isset($foot)
