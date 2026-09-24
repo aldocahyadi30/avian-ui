@@ -122,7 +122,7 @@
     $seedLabels = $hasValue && $selectedLabel !== null ? [(string) $selected => (string) $selectedLabel] : [];
 @endphp
 
-<x-avian::field :bare="!$field" :label="$label" :for="$inputId" :hint="$hint" :error="$inputError"
+<x-avian-ui::field :bare="!$field" :label="$label" :for="$inputId" :hint="$hint" :error="$inputError"
     :required="$required">
     {{-- `x-data` must stay identical across Livewire re-renders: when its
          expression changes, the morph patches the attribute and Alpine
@@ -198,7 +198,7 @@
                 <div class="aui-combobox-list" x-ref="list">
                     @if ($optionList)
                         @foreach ($optionList as $optionValue => $optionLabel)
-                            <x-avian::searchable-select.option :value="$optionValue" :label="$optionLabel" :selected="$selected" />
+                            <x-avian-ui::searchable-select.option :value="$optionValue" :label="$optionLabel" :selected="$selected" />
                         @endforeach
                     @elseif ($slot->isNotEmpty())
                         {{ $slot }}
@@ -225,4 +225,4 @@
             </div>
         </template>
     </div>
-</x-avian::field>
+</x-avian-ui::field>

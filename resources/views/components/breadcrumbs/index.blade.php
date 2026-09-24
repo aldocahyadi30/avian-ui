@@ -44,11 +44,11 @@
     <ol class="aui-breadcrumbs-list">
         @if ($items !== null)
             @foreach ($trail as $item)
-                <x-avian::breadcrumbs.item
+                <x-avian-ui::breadcrumbs.item
                     :href="$loop->last ? null : $item['href']"
                     :icon="$item['icon']"
                     :navigate="$navigate"
-                >{{ $item['label'] }}</x-avian::breadcrumbs.item>
+                >{{ $item['label'] }}</x-avian-ui::breadcrumbs.item>
             @endforeach
         @else
             {{ $slot }}

@@ -14,13 +14,39 @@
 
 ## Installation
 
-You can install the package via Composer:
+Requires PHP 8.3+ and Laravel 12 or 13. The package is not on Packagist, so
+point Composer at the GitHub repository first — add this to the application's
+`composer.json`:
 
-```bash
-composer require aldo-octavio-cahyadi/avian-ui
+```json
+"repositories": [
+    {
+        "type": "vcs",
+        "url": "https://github.com/aldocahyadi30/avian-ui"
+    }
+]
 ```
 
-You may publish all of the package's resources at once:
+Then require it (use a tag such as `^1.0` once one is released, or
+`dev-master` to track the main branch):
+
+```bash
+composer require aldo-octavio-cahyadi/avian-ui:dev-master
+```
+
+To work on the package and an application side by side, use a path
+repository instead (`"type": "path", "url": "../avian-ui"`) and require
+`aldo-octavio-cahyadi/avian-ui:@dev`; Composer symlinks it, so edits show up
+immediately.
+
+That is all the setup there is. The service provider is auto-discovered, the
+components are available straight away as `<x-avian::button>`, and the CSS
+and JS are served by the package's own route — nothing to publish or build.
+Add the asset tags to your layout (see [Include the assets](#1-include-the-assets))
+and start using the components.
+
+Publishing is optional, only for customising. You may publish all of the
+package's resources at once:
 
 ```bash
 php artisan vendor:publish --tag="avian-ui"
@@ -32,13 +58,6 @@ Or, you may publish each resource individually:
 
 ```bash
 php artisan vendor:publish --tag="avian-ui-config"
-```
-
-### Publishing and Running the Migrations
-
-```bash
-php artisan vendor:publish --tag="avian-ui-migrations"
-php artisan migrate
 ```
 
 ### Publishing the Views

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace AvianUi\AvianUi;
 
-use AvianUi\AvianUi\Console\Commands\AvianUiCommand;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 
@@ -54,14 +53,6 @@ class AvianUiServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__.'/../public' => public_path('vendor/avian-ui'),
         ], ['avian-ui', 'avian-ui-assets']);
-
-        $this->publishesMigrations([
-            __DIR__.'/../database/migrations' => database_path('migrations'),
-        ], ['avian-ui', 'avian-ui-migrations']);
-
-        $this->commands([
-            AvianUiCommand::class,
-        ]);
     }
 
     /**

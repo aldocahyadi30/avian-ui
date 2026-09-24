@@ -98,7 +98,7 @@
     $labels = collect($optionList ?? [])->mapWithKeys(fn ($optionLabel, $optionValue) => [(string) $optionValue => (string) $optionLabel])->all();
 @endphp
 
-<x-avian::field :bare="! $field" :label="$label" :for="$inputId" :hint="$hint" :error="$inputError"
+<x-avian-ui::field :bare="! $field" :label="$label" :for="$inputId" :hint="$hint" :error="$inputError"
     :required="$required">
     {{-- Like searchable-select, per-render state goes through `data-*`
          attributes so the `x-data` expression stays constant across
@@ -179,7 +179,7 @@
                 <div class="aui-combobox-list" x-ref="list">
                     @if ($optionList)
                         @foreach ($optionList as $optionValue => $optionLabel)
-                            <x-avian::multi-select.option :value="$optionValue" :label="$optionLabel" :selected="$selected" />
+                            <x-avian-ui::multi-select.option :value="$optionValue" :label="$optionLabel" :selected="$selected" />
                         @endforeach
                     @elseif ($slot->isNotEmpty())
                         {{ $slot }}
@@ -200,4 +200,4 @@
             </div>
         </template>
     </div>
-</x-avian::field>
+</x-avian-ui::field>
