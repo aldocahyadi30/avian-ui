@@ -8,15 +8,23 @@
     paginator (the default from `paginate()`) also gets numbered page links
     and a "Showing X to Y of Z results" summary; a simple paginator
     (`simplePaginate()`) only gets Previous/Next.
+
+    Inside a Livewire component the links become buttons that call
+    `gotoPage()` from Livewire's `WithPagination`, so paging never leaves the
+    page or touches the URL. Pass `:livewire="false"` to force plain links, or
+    `:livewire="true"` to force buttons.
 --}}
 @props([
     'paginator' => null,
     'onEachSide' => 1,
+    'livewire' => null,
 ])
 
 @php
     $hasPages = $paginator !== null && $paginator->hasPages();
     $isLengthAware = $paginator instanceof \Illuminate\Contracts\Pagination\LengthAwarePaginator;
+
+    $livewire ??= class_exists(\Livewire\Livewire::class) && \Livewire\Livewire::current() !== null;
 @endphp
 
 @if ($hasPages)
@@ -39,9 +47,9 @@
                     <i class="fas fa-chevron-left" aria-hidden="true"></i>
                 </span>
             @else
-                <a href="{{ $paginator->previousPageUrl() }}" class="aui-pagination-link" rel="prev">
+                <x-avian-ui::pagination.link :$paginator :page="$paginator->currentPage() - 1" :$livewire rel="prev" aria-label="Previous page">
                     <i class="fas fa-chevron-left" aria-hidden="true"></i>
-                </a>
+                </x-avian-ui::pagination.link>
             @endif
 
             @if ($isLengthAware)
@@ -53,7 +61,7 @@
                 @endphp
 
                 @if ($start > 1)
-                    <a href="{{ $paginator->url(1) }}" class="aui-pagination-link">1</a>
+                    <x-avian-ui::pagination.link :$paginator :page="1" :$livewire>1</x-avian-ui::pagination.link>
 
                     @if ($start > 2)
                         <span class="aui-pagination-ellipsis">&hellip;</span>
@@ -64,7 +72,7 @@
                     @if ($page === $current)
                         <span class="aui-pagination-link aui-pagination-link-active" aria-current="page">{{ $page }}</span>
                     @else
-                        <a href="{{ $paginator->url($page) }}" class="aui-pagination-link">{{ $page }}</a>
+                        <x-avian-ui::pagination.link :$paginator :$page :$livewire>{{ $page }}</x-avian-ui::pagination.link>
                     @endif
                 @endfor
 
@@ -73,14 +81,14 @@
                         <span class="aui-pagination-ellipsis">&hellip;</span>
                     @endif
 
-                    <a href="{{ $paginator->url($last) }}" class="aui-pagination-link">{{ $last }}</a>
+                    <x-avian-ui::pagination.link :$paginator :page="$last" :$livewire>{{ $last }}</x-avian-ui::pagination.link>
                 @endif
             @endif
 
             @if ($paginator->hasMorePages())
-                <a href="{{ $paginator->nextPageUrl() }}" class="aui-pagination-link" rel="next">
+                <x-avian-ui::pagination.link :$paginator :page="$paginator->currentPage() + 1" :$livewire rel="next" aria-label="Next page">
                     <i class="fas fa-chevron-right" aria-hidden="true"></i>
-                </a>
+                </x-avian-ui::pagination.link>
             @else
                 <span class="aui-pagination-link aui-pagination-link-disabled" aria-disabled="true">
                     <i class="fas fa-chevron-right" aria-hidden="true"></i>

@@ -13,11 +13,11 @@ metadata:
 # Avian Ui
 
 Use this skill when a Laravel application needs to build or restyle UI with the
-`aldo-octavio-cahyadi/avian-ui` package.
+`aldocahyadi30/avian-ui` package.
 
 ## Primary Goal
 
-- apply the `aldo-octavio-cahyadi/avian-ui` package's public API in the smallest correct way
+- apply the `aldocahyadi30/avian-ui` package's public API in the smallest correct way
 
 ## Workflow
 

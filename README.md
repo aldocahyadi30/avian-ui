@@ -3,11 +3,11 @@
 </div>
 
 <p align="center">
-    <a href="https://packagist.org/packages/aldo-octavio-cahyadi/avian-ui"><img src="https://img.shields.io/packagist/v/aldo-octavio-cahyadi/avian-ui.svg?style=flat-square" alt="Packagist"></a>
-    <a href="https://packagist.org/packages/aldo-octavio-cahyadi/avian-ui"><img src="https://img.shields.io/packagist/php-v/aldo-octavio-cahyadi/avian-ui.svg?style=flat-square" alt="PHP from Packagist"></a>
-    <a href="https://packagist.org/packages/aldo-octavio-cahyadi/avian-ui"><img src="https://badge.laravel.cloud/badge/aldo-octavio-cahyadi/avian-ui?style=flat" alt="Laravel versions"></a>
-    <a href="https://github.com/aldo-octavio-cahyadi/avian-ui/actions"><img alt="GitHub Workflow Status (main)" src="https://img.shields.io/github/actions/workflow/status/aldo-octavio-cahyadi/avian-ui/tests.yml?branch=main&label=Tests&style=flat-square"></a>
-    <a href="https://packagist.org/packages/aldo-octavio-cahyadi/avian-ui"><img src="https://img.shields.io/packagist/dt/aldo-octavio-cahyadi/avian-ui.svg?style=flat-square" alt="Total Downloads"></a>
+    <a href="https://packagist.org/packages/aldocahyadi30/avian-ui"><img src="https://img.shields.io/packagist/v/aldocahyadi30/avian-ui.svg?style=flat-square" alt="Packagist"></a>
+    <a href="https://packagist.org/packages/aldocahyadi30/avian-ui"><img src="https://img.shields.io/packagist/php-v/aldocahyadi30/avian-ui.svg?style=flat-square" alt="PHP from Packagist"></a>
+    <a href="https://packagist.org/packages/aldocahyadi30/avian-ui"><img src="https://badge.laravel.cloud/badge/aldocahyadi30/avian-ui?style=flat" alt="Laravel versions"></a>
+    <a href="https://github.com/aldocahyadi30/avian-ui/actions"><img alt="GitHub Workflow Status (main)" src="https://img.shields.io/github/actions/workflow/status/aldocahyadi30/avian-ui/tests.yml?branch=main&label=Tests&style=flat-square"></a>
+    <a href="https://packagist.org/packages/aldocahyadi30/avian-ui"><img src="https://img.shields.io/packagist/dt/aldocahyadi30/avian-ui.svg?style=flat-square" alt="Total Downloads"></a>
 </p>
 
 
@@ -31,12 +31,12 @@ Then require it (use a tag such as `^1.0` once one is released, or
 `dev-master` to track the main branch):
 
 ```bash
-composer require aldo-octavio-cahyadi/avian-ui:dev-master
+composer require aldocahyadi30/avian-ui:dev-master
 ```
 
 To work on the package and an application side by side, use a path
 repository instead (`"type": "path", "url": "../avian-ui"`) and require
-`aldo-octavio-cahyadi/avian-ui:@dev`; Composer symlinks it, so edits show up
+`aldocahyadi30/avian-ui:@dev`; Composer symlinks it, so edits show up
 immediately.
 
 That is all the setup there is. The service provider is auto-discovered, the
@@ -126,8 +126,8 @@ refetches the files whenever the package is updated.
 To bundle the source through Vite instead:
 
 ```js
-import 'aldo-octavio-cahyadi/avian-ui/public/css/avian-ui.css';
-import 'aldo-octavio-cahyadi/avian-ui/public/js/avian-ui.js';
+import '../../vendor/aldocahyadi30/avian-ui/public/css/avian-ui.css';
+import '../../vendor/aldocahyadi30/avian-ui/public/js/avian-ui.js';
 ```
 
 ### 2. Theming
@@ -490,6 +490,10 @@ Z results" summary) or `simplePaginate()` (Previous/Next only). The same
 markup is available on its own as `<x-avian::pagination :paginator="$users" />`
 for a paginator you render outside a table.
 
+Inside a Livewire component (using `WithPagination`), the page links render as
+buttons that call `gotoPage()`, so paging updates the component in place
+instead of following a URL. Pass `:livewire="false"` to force plain links.
+
 When the table has no rows it renders an empty state spanning every column
 ("No data found" by default). Customize it with `empty`, `empty-text` and
 `empty-icon`, replace it entirely with an `empty` slot, or turn it off with
@@ -680,7 +684,7 @@ Please review [our security policy](.github/SECURITY.md) on how to report securi
 
 ## Credits
 
-- [Aldo Octavio Cahyadi](https://github.com/aldo-octavio-cahyadi)
+- [Aldo Octavio Cahyadi](https://github.com/aldocahyadi30)
 - [All Contributors](../../contributors)
 
 ## License

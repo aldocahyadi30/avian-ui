@@ -222,6 +222,23 @@ it('disables the previous link on the first page and the next link on the last p
         ->not->toContain('rel="next"');
 });
 
+it('renders livewire gotoPage buttons instead of links in livewire mode', function () {
+    $paginator = new LengthAwarePaginator(
+        items: ['Ada', 'Grace'],
+        total: 42,
+        perPage: 2,
+        currentPage: 3,
+        options: ['path' => '/users', 'pageName' => 'usersPage'],
+    );
+
+    $html = Blade::render('<x-avian::pagination :paginator="$paginator" :livewire="true" />', ['paginator' => $paginator]);
+
+    expect($html)->toContain('type="button" wire:click="gotoPage(2, &#039;usersPage&#039;)" class="aui-pagination-link" rel="prev"')
+        ->toContain('wire:click="gotoPage(4, &#039;usersPage&#039;)" class="aui-pagination-link" rel="next"')
+        ->toContain('wire:click="gotoPage(21, &#039;usersPage&#039;)"')
+        ->not->toContain('href=');
+});
+
 it('renders nothing for a paginator without extra pages', function () {
     $paginator = new LengthAwarePaginator(
         items: ['Ada'],

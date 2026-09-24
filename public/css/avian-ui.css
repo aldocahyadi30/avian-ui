@@ -1443,6 +1443,10 @@
     font-weight: 600;
     color: var(--aui-slate-600);
     text-decoration: none;
+    background: none;
+    border: 0;
+    font-family: inherit;
+    cursor: pointer;
     transition: background var(--aui-transition-fast), color var(--aui-transition-fast);
 }
 
