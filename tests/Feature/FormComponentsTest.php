@@ -423,6 +423,31 @@ it('renders a datepicker with range, time and bounds options', function () {
         ->toContain('data-fp-max-date="2024-12-31"');
 });
 
+it('renders a time only datepicker without the calendar', function () {
+    $html = Blade::render('<x-avian::datepicker name="opens_at" mode="time" min-time="08:00" max-time="17:00" />');
+
+    expect($html)->toContain('data-fp-mode="single"')
+        ->toContain('data-fp-date-format="H:i"')
+        ->toContain('data-fp-enable-time="true"')
+        ->toContain('data-fp-no-calendar="true"')
+        ->toContain('data-fp-time-24hr="true"')
+        ->toContain('data-fp-min-time="08:00"')
+        ->toContain('data-fp-max-time="17:00"')
+        ->toContain('aui-timepicker')
+        ->not->toContain('data-fp-mode="time"');
+});
+
+it('switches a time picker to a 12 hour clock and keeps date pickers calendar based', function () {
+    expect(Blade::render('<x-avian::datepicker name="at" mode="time" :time24hr="false" date-format="h:i K" />'))
+        ->toContain('data-fp-date-format="h:i K"')
+        ->not->toContain('data-fp-time-24hr');
+
+    expect(Blade::render('<x-avian::datepicker name="on" min-time="08:00" />'))
+        ->not->toContain('data-fp-no-calendar')
+        ->not->toContain('data-fp-time-24hr')
+        ->not->toContain('data-fp-min-time');
+});
+
 it('pulls the validation message for the datepicker out of the error bag', function () {
     bindErrors(['start_date' => ['The start date field is required.']]);
 

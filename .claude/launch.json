@@ -3,9 +3,13 @@
     "configurations": [
         {
             "name": "workbench",
-            "runtimeExecutable": "composer",
-            "runtimeArgs": ["serve"],
-            "port": 8000
+            "runtimeExecutable": "php",
+            "runtimeArgs": [
+                "-r",
+                "passthru('php vendor/bin/testbench workbench:build'); passthru('php vendor/bin/testbench serve --port=' . (getenv('PORT') ?: 8000));"
+            ],
+            "port": 8000,
+            "autoPort": true
         }
     ]
 }

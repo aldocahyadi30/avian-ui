@@ -9,8 +9,12 @@
                 mode: input.dataset.fpMode,
                 dateFormat: input.dataset.fpDateFormat,
                 enableTime: input.dataset.fpEnableTime === 'true',
+                noCalendar: input.dataset.fpNoCalendar === 'true',
+                time_24hr: input.dataset.fpTime24hr === 'true',
                 minDate: input.dataset.fpMinDate || null,
                 maxDate: input.dataset.fpMaxDate || null,
+                minTime: input.dataset.fpMinTime || null,
+                maxTime: input.dataset.fpMaxTime || null,
             });
         });
 
@@ -24,6 +28,12 @@
         <x-avian::datepicker name="start_date" label="Start date" />
         <x-avian::datepicker name="range" label="Date range" mode="range" />
         <x-avian::datepicker name="datetime" label="Appointment" enable-time date-format="Y-m-d H:i" />
+        <x-avian::datepicker name="opens_at" label="Opens at" mode="time" min-time="08:00" max-time="17:00" />
+
+    `mode="time"` is a time-only picker (flatpickr's `noCalendar`): the
+    format defaults to `H:i`, and `time-24hr` (on by default) switches the
+    clock between 24-hour and AM/PM. `min-time` / `max-time` bound the time
+    of any picker with a clock (`mode="time"` or `enable-time`).
 --}}
 @props([
     'name' => null,
@@ -38,9 +48,12 @@
     'placeholder' => null,
     'mode' => 'single',
     'enableTime' => false,
-    'dateFormat' => 'd/m/Y',
+    'dateFormat' => null,
+    'time24hr' => true,
     'minDate' => null,
     'maxDate' => null,
+    'minTime' => null,
+    'maxTime' => null,
     'field' => true,
     'disabled' => false,
 ])
@@ -57,6 +70,11 @@
     if ($inputValue === null && ! $wired) {
         $inputValue = $avianUi->oldValue($name);
     }
+
+    // `time` is not a flatpickr mode: it is a single picker without the calendar.
+    $timeOnly = $mode === 'time';
+    $withTime = $timeOnly || $enableTime;
+    $format = $dateFormat ?? ($timeOnly ? 'H:i' : 'd/m/Y');
 @endphp
 
 <x-avian-ui::field
@@ -70,16 +88,21 @@
     <input
         type="text"
         autocomplete="off"
-        data-fp-mode="{{ $mode }}"
-        data-fp-date-format="{{ $dateFormat }}"
-        @if ($enableTime) data-fp-enable-time="true" @endif
+        data-fp-mode="{{ $timeOnly ? 'single' : $mode }}"
+        data-fp-date-format="{{ $format }}"
+        @if ($withTime) data-fp-enable-time="true" @endif
+        @if ($timeOnly) data-fp-no-calendar="true" @endif
+        @if ($withTime && $time24hr) data-fp-time-24hr="true" @endif
         @if ($minDate) data-fp-min-date="{{ $minDate }}" @endif
         @if ($maxDate) data-fp-max-date="{{ $maxDate }}" @endif
+        @if ($withTime && $minTime) data-fp-min-time="{{ $minTime }}" @endif
+        @if ($withTime && $maxTime) data-fp-max-time="{{ $maxTime }}" @endif
         {{ $attributes->class([
             'aui-input',
             'aui-input-'.$size => filled($size),
             'aui-input-invalid' => filled($inputError),
             'flatpickr-input',
+            'aui-timepicker' => $timeOnly,
         ])->merge([
             'name' => $name,
             'id' => $inputId,

@@ -36,7 +36,7 @@ building. Never add a CDN tag for the package assets.
 
 **Components.** Use the anonymous components rather than hand-written markup:
 
-- general: `button`, `card`, `badge`, `alert`, `table`, `datalist` (+ `datalist.item`), `pagination`, `page-header`, `empty`, `avatar`, `progress`, `spinner`, `modal`, `dropdown` (+ `dropdown.item`), `tabs` (+ `tabs.panel`)
+- general: `button`, `card`, `stat`, `badge`, `alert`, `table`, `datalist` (+ `datalist.item`), `pagination`, `page-header`, `breadcrumbs` (+ `breadcrumbs.item`), `empty`, `avatar`, `progress`, `spinner`, `divider`, `accordion` (+ `accordion.item`), `modal`, `drawer`, `confirm`, `dropdown` (+ `dropdown.item`), `tabs` (+ `tabs.panel`)
 - form: `form`, `field`, `label`, `error`, `hint`, `input`, `textarea`, `select`, `searchable-select` (+ `searchable-select.option`), `multi-select` (+ `multi-select.option`), `checkbox`, `radio`, `switch`, `file`, `datepicker`
 
 Form controls render their own label, hint and validation message from `name`,
@@ -72,11 +72,26 @@ same as any Alpine plugin); the package does not bundle it.
 
 `datepicker` renders a plain text input carrying a `flatpickr-input` hook
 class and `data-fp-*` attributes (`mode`, `enable-time`, `date-format`,
-`min-date`, `max-date`):
+`min-date`, `max-date`, and for a clock `time-24hr`, `min-time`, `max-time`;
+`mode="time"` is time-only, formatted `H:i` by default):
 `<x-avian::datepicker name="start_date" label="Start date" />`. Like
 `numeric`, [flatpickr](https://flatpickr.js.org) is not bundled — the host
 app loads it and upgrades every `.flatpickr-input` on page load, reading its
 config from the `data-fp-*` attributes.
+
+For destructive actions, place `<x-avian::confirm />` once in the layout and
+add `confirm="message"` to the `button` (or `data-aui-confirm` to any element
+or form) — never hand-roll a confirm modal or use `wire:confirm`. From
+Livewire: `$this->dispatch('aui-confirm', message: '...', event: 'x', params: [...])`
+dispatches `x` back on a yes; from JS: `AvianUI.confirm({...})` returns a
+promise of a boolean.
+
+Use `drawer` (same events as `modal`: `modal="name"` on a button,
+`aui-modal-open`, `hide()`) for filters or quick-edit side panels, `stat` for
+dashboard KPI tiles (pre-formatted `value`, `change` sign picks the arrow,
+`invert` when less is better), `breadcrumbs` (`label => url` items, last one
+current) right above `page-header`, `accordion` for collapsible sections and
+`divider` between blocks.
 
 Pass `icon-only` to `button` for a square, icon-only button (table row
 actions, a toolbar) — it has no visible text, so it needs `label` for an

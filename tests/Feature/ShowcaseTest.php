@@ -23,6 +23,14 @@ it('renders every component together on the workbench showcase', function () {
         ->toContain('auiSearchableSelect(')
         ->toContain('auiFile(')
         ->toContain('flatpickr-input')
+        ->toContain('data-fp-no-calendar="true"')
+        ->toContain('auiConfirm(')
+        ->toContain('data-aui-confirm=')
+        ->toContain('auiAccordion(')
+        ->toContain('aui-drawer aui-drawer-right')
+        ->toContain('aui-breadcrumbs')
+        ->toContain('aui-stat-change-good')
+        ->toContain('aui-divider-labelled')
         ->toContain('avian-ui/css/avian-ui.css')
         ->toContain('avian-ui/js/avian-ui.js');
 });

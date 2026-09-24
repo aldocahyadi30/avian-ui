@@ -20,6 +20,14 @@
 
         <x-avian::button variant="outline" color="danger">Remove</x-avian::button>
         <x-avian::button variant="ghost" color="success">Approve</x-avian::button>
+
+    `confirm` holds the click back behind `<x-avian::confirm>` (placed once
+    in the layout) and replays it once the user agrees, so `wire:click`,
+    `href` and form submits behave as usual after a yes. Tune the dialog with
+    `data-aui-confirm-title`, `data-aui-confirm-text` (the yes button),
+    `data-aui-cancel-text` and `data-aui-confirm-variant`:
+
+        <x-avian::button variant="danger" wire:click="delete({{ $id }})" confirm="Delete this order?">Delete</x-avian::button>
 --}}
 @props([
     'variant' => 'primary',
@@ -36,6 +44,7 @@
     'block' => false,
     'disabled' => false,
     'modal' => null,
+    'confirm' => null,
 ])
 
 @php
@@ -75,6 +84,7 @@
         'aria-label' => $iconOnly ? $label : null,
         'x-data' => $opens === null ? null : '{}',
         'x-on:click' => $opens,
+        'data-aui-confirm' => filled($confirm) ? $confirm : null,
     ]) }}
 >
     @if ($loading)

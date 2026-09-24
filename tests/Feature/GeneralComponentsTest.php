@@ -378,3 +378,151 @@ it('renders the script tag deferred', function () {
         ->toContain('avian-ui/js/avian-ui.js?id=')
         ->toContain('defer');
 });
+
+it('holds a button click back behind the confirm dialog when asked', function () {
+    expect(Blade::render('<x-avian::button wire:click="delete(1)" confirm="Delete this order?" data-aui-confirm-title="Delete order">Delete</x-avian::button>'))
+        ->toContain('data-aui-confirm="Delete this order?"')
+        ->toContain('data-aui-confirm-title="Delete order"')
+        ->toContain('wire:click="delete(1)"');
+
+    expect(Blade::render('<x-avian::button>Save</x-avian::button>'))
+        ->not->toContain('data-aui-confirm');
+});
+
+it('renders the shared confirm dialog with translated defaults', function () {
+    $html = Blade::render('<x-avian::confirm />');
+
+    expect($html)->toContain('x-data="auiConfirm(')
+        ->toContain('Are you sure?')
+        ->toContain('confirmText')
+        ->toContain('Confirm')
+        ->toContain('Cancel')
+        ->toContain('role="alertdialog"')
+        ->toContain('x-ref="cancel"');
+
+    expect(Blade::render('<x-avian::confirm title="Really?" confirm-text="Yes, delete" variant="warning" />'))
+        ->toContain('Really?')
+        ->toContain('Yes, delete')
+        ->toContain('warning');
+});
+
+it('renders breadcrumbs from label and url pairs with the last one current', function () {
+    $html = Blade::render('<x-avian::breadcrumbs :items="$items" navigate />', [
+        'items' => ['Dashboard' => '/dashboard', 'Orders' => '/orders', 'ORD-1' => null],
+    ]);
+
+    expect($html)->toContain('aria-label="Breadcrumb"')
+        ->toContain('class="aui-breadcrumbs"')
+        ->toContain('href="/dashboard"')
+        ->toContain('href="/orders"')
+        ->toContain('wire:navigate')
+        ->toContain('aria-current="page"')
+        ->toMatch('/aria-current="page">\s*ORD-1/');
+});
+
+it('renders breadcrumbs from item arrays and never links the current page', function () {
+    $html = Blade::render('<x-avian::breadcrumbs :items="$items" />', [
+        'items' => [
+            ['label' => 'Home', 'href' => '/', 'icon' => 'fas fa-house'],
+            ['label' => 'Settings', 'href' => '/settings'],
+        ],
+    ]);
+
+    expect($html)->toContain('<i class="fas fa-house"')
+        ->toContain('href="/"')
+        ->not->toContain('href="/settings"')
+        ->not->toContain('wire:navigate');
+});
+
+it('renders breadcrumb items written by hand', function () {
+    $html = Blade::render(<<<'BLADE'
+        <x-avian::breadcrumbs>
+            <x-avian::breadcrumbs.item href="/">Home</x-avian::breadcrumbs.item>
+            <x-avian::breadcrumbs.item>Profile</x-avian::breadcrumbs.item>
+        </x-avian::breadcrumbs>
+    BLADE);
+
+    expect($html)->toContain('class="aui-breadcrumbs-link"')
+        ->toContain('aui-breadcrumbs-item is-current');
+});
+
+it('renders an accordion with items wired to its alpine component', function () {
+    $html = Blade::render(<<<'BLADE'
+        <x-avian::accordion multiple flush>
+            <x-avian::accordion.item title="Shipping" subtitle="Where it goes" icon="fas fa-truck" open>Address</x-avian::accordion.item>
+            <x-avian::accordion.item title="Billing" name="billing">Invoice</x-avian::accordion.item>
+        </x-avian::accordion>
+    BLADE);
+
+    expect($html)->toContain('x-data="auiAccordion({ multiple: true })"')
+        ->toContain('aui-accordion aui-accordion-flush')
+        ->toContain('aui-accordion-item is-open')
+        ->toContain('Where it goes')
+        ->toContain('<i class="aui-accordion-icon fas fa-truck"')
+        ->toContain("x-data=\"{ key: 'billing' ?? \$id('aui-accordion') }\"")
+        ->toContain('x-on:click="toggle(key)"')
+        ->toContain('style="display: none"');
+});
+
+it('renders a drawer driven by the modal alpine component', function () {
+    $html = Blade::render(<<<'BLADE'
+        <x-avian::drawer name="filters" title="Filters" subtitle="Narrow the list" position="left" size="lg">
+            Body
+            <x-slot:footer>Footer</x-slot:footer>
+        </x-avian::drawer>
+    BLADE);
+
+    expect($html)->toContain('x-data="auiModal(')
+        ->toContain('data-modal="filters"')
+        ->toContain('aui-drawer aui-drawer-left aui-drawer-lg')
+        ->toContain('Narrow the list')
+        ->toContain('<div class="aui-drawer-footer">Footer</div>')
+        ->toContain('aria-label="Close"');
+
+    expect(Blade::render('<x-avian::drawer name="x">Body</x-avian::drawer>'))
+        ->toContain('aui-drawer aui-drawer-right aui-drawer-md');
+});
+
+it('renders a stat with its trend read from the sign of the change', function () {
+    $up = Blade::render('<x-avian::stat label="Revenue" value="Rp 12 jt" change="+12.5%" description="vs last month" icon="fas fa-wallet" />');
+    $down = Blade::render('<x-avian::stat label="Orders" value="320" change="-4%" />');
+    $flat = Blade::render('<x-avian::stat label="Returns" value="3" change="0%" />');
+
+    expect($up)->toContain('aui-stat-change aui-stat-change-good')
+        ->toContain('fa-arrow-trend-up')
+        ->toContain('vs last month')
+        ->toContain('aui-stat-icon aui-stat-icon-primary')
+        ->and($down)->toContain('aui-stat-change-bad')
+        ->toContain('fa-arrow-trend-down')
+        ->not->toContain('aui-stat-icon')
+        ->and($flat)->toContain('aui-stat-change-flat');
+});
+
+it('inverts the stat tone and renders it as a link when asked', function () {
+    $html = Blade::render('<x-avian::stat label="Costs" value="Rp 4 jt" change="-8%" invert href="/costs" navigate />');
+
+    expect($html)->toContain('<a')
+        ->toContain('href="/costs"')
+        ->toContain('wire:navigate')
+        ->toContain('aui-stat aui-stat-link')
+        ->toContain('aui-stat-change-good');
+
+    expect(Blade::render('<x-avian::stat label="Users" value="12" />'))
+        ->not->toContain('aui-stat-meta');
+});
+
+it('renders plain, labelled and vertical dividers', function () {
+    expect(Blade::render('<x-avian::divider />'))->toContain('<hr class="aui-divider"');
+
+    expect(Blade::render('<x-avian::divider label="or" />'))
+        ->toContain('aui-divider aui-divider-labelled')
+        ->toContain('<span class="aui-divider-label">or</span>');
+
+    expect(Blade::render('<x-avian::divider align="left">Shipping</x-avian::divider>'))
+        ->toContain('aui-divider-left')
+        ->toContain('Shipping');
+
+    expect(Blade::render('<x-avian::divider vertical />'))
+        ->toContain('aui-divider-vertical')
+        ->toContain('aria-orientation="vertical"');
+});

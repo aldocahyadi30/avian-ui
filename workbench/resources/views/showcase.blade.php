@@ -13,7 +13,11 @@
         ],
         'Layout' => [
             'components.page-header' => ['label' => 'Page header', 'icon' => 'fas fa-heading'],
+            'components.breadcrumbs' => ['label' => 'Breadcrumbs', 'icon' => 'fas fa-angles-right'],
             'components.card' => ['label' => 'Card', 'icon' => 'fas fa-square'],
+            'components.stat' => ['label' => 'Stat', 'icon' => 'fas fa-chart-line'],
+            'components.accordion' => ['label' => 'Accordion', 'icon' => 'fas fa-bars-staggered'],
+            'components.divider' => ['label' => 'Divider', 'icon' => 'fas fa-grip-lines'],
         ],
         'Forms' => [
             'forms.form' => ['label' => 'Form & layout', 'icon' => 'fas fa-pen-to-square'],
@@ -38,6 +42,8 @@
         ],
         'Overlays & feedback' => [
             'components.modal' => ['label' => 'Modal', 'icon' => 'fas fa-window-restore'],
+            'components.drawer' => ['label' => 'Drawer', 'icon' => 'fas fa-table-columns'],
+            'components.confirm' => ['label' => 'Confirm dialog', 'icon' => 'fas fa-circle-question'],
             'components.alert' => ['label' => 'Alert', 'icon' => 'fas fa-circle-info'],
             'components.empty' => ['label' => 'Empty state', 'icon' => 'fas fa-inbox'],
         ],
@@ -75,8 +81,12 @@
                     mode: input.dataset.fpMode,
                     dateFormat: input.dataset.fpDateFormat,
                     enableTime: input.dataset.fpEnableTime === 'true',
+                    noCalendar: input.dataset.fpNoCalendar === 'true',
+                    time_24hr: input.dataset.fpTime24hr === 'true',
                     minDate: input.dataset.fpMinDate || null,
                     maxDate: input.dataset.fpMaxDate || null,
+                    minTime: input.dataset.fpMinTime || null,
+                    maxTime: input.dataset.fpMaxTime || null,
                 });
             });
         });
@@ -244,5 +254,8 @@
             <x-avian::button icon="fas fa-check">Create</x-avian::button>
         </x-slot:footer>
     </x-avian::modal>
+
+    {{-- One shared confirm dialog for the whole page, as an app layout would have. --}}
+    <x-avian::confirm />
 </body>
 </html>

@@ -200,7 +200,7 @@ themselves from old input after a failed validation round trip.
 | `clearable`, `taggable`, `create-text` | searchable-select, multi-select | Reset button; accept free-typed values (`:term` in `create-text` is replaced) |
 | `max` | multi-select | Cap how many values can be picked |
 | `inline` | checkbox, radio | Lay several out on one line |
-| `mode`, `enable-time`, `date-format`, `min-date`, `max-date` | datepicker | Flatpickr config, read from `data-fp-*` attributes |
+| `mode` (incl. `time`), `enable-time`, `time-24hr`, `date-format`, `min-date`, `max-date`, `min-time`, `max-time` | datepicker | Flatpickr config, read from `data-fp-*` attributes |
 
 `numeric` renders the input as a plain text field wired to Alpine's dynamic
 money mask (`x-mask:dynamic="$money($input)"`), formatting thousands
@@ -321,7 +321,9 @@ Livewire stays the single source of truth.
 
 `datepicker` renders a plain text input carrying a `flatpickr-input` hook class
 and `data-fp-*` attributes (`data-fp-mode`, `data-fp-date-format`,
-`data-fp-enable-time`, `data-fp-min-date`, `data-fp-max-date`). Like `numeric`,
+`data-fp-enable-time`, `data-fp-no-calendar`, `data-fp-time-24hr`,
+`data-fp-min-date`, `data-fp-max-date`, `data-fp-min-time`, `data-fp-max-time`).
+Like `numeric`,
 [flatpickr](https://flatpickr.js.org) itself is not bundled by the package —
 the host application loads it and upgrades every `.flatpickr-input` on page
 load (and again after `livewire:navigated`, for a Livewire SPA-style page),
@@ -333,6 +335,26 @@ input `readonly` by default, so it renders with the same dimmed styling as a
 <x-avian::datepicker name="start_date" label="Start date" />
 <x-avian::datepicker name="range" label="Date range" mode="range" />
 <x-avian::datepicker name="datetime" label="Appointment" enable-time date-format="Y-m-d H:i" />
+<x-avian::datepicker name="opens_at" label="Opens at" mode="time" min-time="08:00" max-time="17:00" />
+```
+
+`mode="time"` is a time-only picker (flatpickr's `noCalendar`): the format
+defaults to `H:i`, and `time-24hr` (on by default) picks a 24-hour clock — pass
+`:time24hr="false"` with `date-format="h:i K"` for AM/PM. The host app's init
+script maps the new attributes like the others:
+
+```js
+flatpickr(input, {
+    mode: input.dataset.fpMode,
+    dateFormat: input.dataset.fpDateFormat,
+    enableTime: input.dataset.fpEnableTime === 'true',
+    noCalendar: input.dataset.fpNoCalendar === 'true',
+    time_24hr: input.dataset.fpTime24hr === 'true',
+    minDate: input.dataset.fpMinDate || null,
+    maxDate: input.dataset.fpMaxDate || null,
+    minTime: input.dataset.fpMinTime || null,
+    maxTime: input.dataset.fpMaxTime || null,
+});
 ```
 
 ### 4. General components
@@ -367,13 +389,51 @@ input `readonly` by default, so it renders with the same dimmed styling as a
 </x-avian::card>
 ```
 
-Available components: `alert`, `avatar`, `badge`, `button`, `card`,
-`dropdown` (+ `dropdown.item`), `empty`, `page-header`, `pagination`,
-`progress`, `scripts`, `spinner`, `styles`, `table`, `datalist`
-(+ `datalist.item`), `tabs` (+ `tabs.panel`),
+Available components: `accordion` (+ `accordion.item`), `alert`, `avatar`,
+`badge`, `breadcrumbs` (+ `breadcrumbs.item`), `button`, `card`, `confirm`,
+`divider`, `drawer`, `dropdown` (+ `dropdown.item`), `empty`, `page-header`,
+`pagination`, `progress`, `scripts`, `spinner`, `stat`, `styles`, `table`,
+`datalist` (+ `datalist.item`), `tabs` (+ `tabs.panel`),
 `modal`, plus the form set `form`, `field`, `label`, `error`, `hint`, `input`,
 `textarea`, `select`, `searchable-select` (+ `searchable-select.option`),
-`checkbox`, `radio`, `switch`, `file`, `datepicker`.
+`multi-select` (+ `multi-select.option`), `checkbox`, `radio`, `switch`,
+`file`, `datepicker`.
+
+Breadcrumbs go right above the page header. Pass `label => url` pairs (the last
+one is the current page) or a list of `['label', 'href', 'icon']` arrays:
+
+```blade
+<x-avian::breadcrumbs navigate :items="[
+    'Dashboard' => route('dashboard'),
+    'Orders' => route('orders.index'),
+    $order->number => null,
+]" />
+```
+
+`stat` is a KPI tile: a label, a pre-formatted value and how it moved. The
+sign of `change` picks the arrow; up is green and down red, and `invert`
+swaps them for numbers where less is better:
+
+```blade
+<div class="aui-grid aui-grid-4">
+    <x-avian::stat label="Revenue" value="Rp 1,28 M" change="+12.5%" description="vs last month" icon="fas fa-wallet" />
+    <x-avian::stat label="Returns" value="18" change="-22%" invert icon="fas fa-rotate-left" color="warning" />
+</div>
+```
+
+`accordion` stacks collapsible sections — one open at a time unless
+`multiple` is set; `flush` drops the border for use inside a card. `divider`
+draws a rule, optionally labelled (`label="or"`, `align="left"`) or `vertical`
+inside a flex row:
+
+```blade
+<x-avian::accordion>
+    <x-avian::accordion.item title="Shipping address" icon="fas fa-truck" open>...</x-avian::accordion.item>
+    <x-avian::accordion.item title="Billing address">...</x-avian::accordion.item>
+</x-avian::accordion>
+
+<x-avian::divider label="or" />
+```
 
 Pass `icon-only` for a square, icon-only button (a table row action, a
 toolbar) — it has no visible text, so pass `label` for an accessible name:
@@ -519,8 +579,48 @@ rounded buttons, or `segmented` for a grouped segmented-control look:
 </x-avian::tabs>
 ```
 
-The Alpine components registered by the package are `auiModal`, `auiDropdown`,
-`auiTabs`, `auiDismiss`, `auiFile` and `auiSearchableSelect`. The modal
+A `drawer` is a side panel driven by the same Alpine component and events as
+the modal, so `modal="filters"`, `aui-modal-open` and `hide()` all work.
+`position` is `right` (default) or `left`, `size` is `sm`, `md`, `lg` or `xl`:
+
+```blade
+<x-avian::button variant="light" icon="fas fa-filter" modal="filters">Filters</x-avian::button>
+
+<x-avian::drawer name="filters" title="Filters">
+    ...
+    <x-slot:footer>
+        <x-avian::button wire:click="applyFilters" x-on:click="hide()">Apply</x-avian::button>
+    </x-slot:footer>
+</x-avian::drawer>
+```
+
+For "Are you sure?" prompts, place `<x-avian::confirm />` once in the layout.
+Then give a button `confirm="…"` (or any element / form `data-aui-confirm`)
+and its click or submit only goes through after a yes — `wire:click`, `href`
+and form submits keep working unchanged. Tune the dialog with
+`data-aui-confirm-title`, `data-aui-confirm-text`, `data-aui-cancel-text` and
+`data-aui-confirm-variant`:
+
+```blade
+<x-avian::button variant="danger" wire:click="delete({{ $order->id }})"
+    confirm="This cannot be undone." data-aui-confirm-title="Delete order?">
+    Delete
+</x-avian::button>
+```
+
+```php
+// Livewire: dispatch `event` back on a yes, for an #[On('order-delete')] listener
+$this->dispatch('aui-confirm', message: 'Delete this order?', event: 'order-delete', params: ['id' => 5]);
+```
+
+```js
+// Plain JavaScript: resolves to true or false
+window.AvianUI.confirm({ title: 'Discard draft?' }).then((ok) => ok && discard());
+```
+
+The Alpine components registered by the package are `auiModal`, `auiConfirm`,
+`auiDropdown`, `auiTabs`, `auiAccordion`, `auiDismiss`, `auiFile`,
+`auiDatalist`, `auiSearchableSelect` and `auiMultiSelect`. The modal
 releases the body scroll lock on `livewire:navigating`, so `wire:navigate`
 never strands a locked page.
 

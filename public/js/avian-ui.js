@@ -56,6 +56,96 @@
         return null;
     }
 
+    /* The mounted <x-avian::confirm>, if the layout has one. */
+    var confirmHost = null;
+
+    function confirmDialog(options) {
+        options = options || {};
+
+        if (confirmHost) {
+            return confirmHost.ask(options);
+        }
+
+        return Promise.resolve(window.confirm(options.message || options.title || 'Are you sure?'));
+    }
+
+    /* data-aui-confirm-* attributes → confirm() options. */
+    function confirmOptions(element) {
+        var data = element.dataset;
+
+        return {
+            message: data.auiConfirm,
+            title: data.auiConfirmTitle,
+            confirmText: data.auiConfirmText,
+            cancelText: data.auiCancelText,
+            variant: data.auiConfirmVariant,
+        };
+    }
+
+    /*
+     * Hold back clicks on [data-aui-confirm] and submits of form[data-aui-confirm]
+     * until the user agrees, then replay them. Both listeners run in the capture
+     * phase on the document, so they fire before any handler on the element
+     * itself (wire:click, wire:submit, x-on:click, a link's navigation).
+     */
+    document.addEventListener('click', function (event) {
+        var element = event.target && event.target.closest ? event.target.closest('[data-aui-confirm]') : null;
+
+        if (! element || element.tagName === 'FORM' || element.disabled) {
+            return;
+        }
+
+        if (element._auiConfirmed) {
+            element._auiConfirmed = false;
+
+            return;
+        }
+
+        event.preventDefault();
+        event.stopImmediatePropagation();
+
+        confirmDialog(confirmOptions(element)).then(function (ok) {
+            if (ok) {
+                element._auiConfirmed = true;
+                element.click();
+            }
+        });
+    }, true);
+
+    document.addEventListener('submit', function (event) {
+        var form = event.target;
+
+        if (! form || ! form.matches || ! form.matches('form[data-aui-confirm]')) {
+            return;
+        }
+
+        if (form._auiConfirmed) {
+            form._auiConfirmed = false;
+
+            return;
+        }
+
+        var submitter = event.submitter || null;
+
+        event.preventDefault();
+        event.stopImmediatePropagation();
+
+        confirmDialog(confirmOptions(form)).then(function (ok) {
+            if (! ok) {
+                return;
+            }
+
+            form._auiConfirmed = true;
+
+            if (form.requestSubmit) {
+                form.requestSubmit(submitter && submitter.form === form ? submitter : undefined);
+            } else {
+                form.submit();
+                form._auiConfirmed = false;
+            }
+        });
+    }, true);
+
     var components = {
         /**
          * Modal / dialog.
@@ -138,6 +228,11 @@
                 },
 
                 escape: function () {
+                    /* Esc answers a confirm dialog on top first. */
+                    if (confirmHost && confirmHost.open) {
+                        return;
+                    }
+
                     if (this.closeOnEscape) {
                         this.hide();
                     }
@@ -147,6 +242,153 @@
                     if (this.closeOnOverlay && event.target === event.currentTarget) {
                         this.hide();
                     }
+                },
+            };
+        },
+
+        /**
+         * Shared confirmation dialog (<x-avian::confirm>).
+         *
+         *   window.AvianUI.confirm({ message: 'Delete?' }).then(ok => ...)   // plain JS
+         *   $dispatch('aui-confirm', { message: 'Delete?', event: 'go' })   // Alpine
+         *   $this->dispatch('aui-confirm', message: 'Delete?', event: 'go'); // Livewire
+         *
+         * With `event`, a yes dispatches that browser event (with `params` as
+         * its detail), which a Livewire #[On] listener picks up.
+         */
+        auiConfirm: function (config) {
+            config = config || {};
+
+            var defaults = {
+                title: config.title || 'Are you sure?',
+                message: '',
+                confirmText: config.confirmText || 'Confirm',
+                cancelText: config.cancelText || 'Cancel',
+                variant: config.variant || 'danger',
+            };
+
+            return {
+                open: false,
+                current: Object.assign({}, defaults),
+                resolve: null,
+
+                init: function () {
+                    var self = this;
+
+                    confirmHost = this;
+
+                    this.onAsk = function (event) {
+                        var detail = event.detail;
+
+                        /* Livewire wraps positional dispatch params in an array. */
+                        if (detail && Array.isArray(detail.params) && typeof detail.params[0] === 'object' && ! detail.message) {
+                            detail = detail.params[0];
+                        }
+
+                        detail = typeof detail === 'string' ? { message: detail } : (detail || {});
+
+                        self.ask(detail).then(function (ok) {
+                            if (ok && detail.event) {
+                                window.dispatchEvent(new CustomEvent(detail.event, { detail: detail.params || {} }));
+                            }
+                        });
+                    };
+
+                    window.addEventListener('aui-confirm', this.onAsk);
+                },
+
+                destroy: function () {
+                    window.removeEventListener('aui-confirm', this.onAsk);
+
+                    if (confirmHost === this) {
+                        confirmHost = null;
+                    }
+
+                    this.answer(false);
+                },
+
+                get icon() {
+                    return {
+                        danger: 'fas fa-triangle-exclamation',
+                        warning: 'fas fa-circle-exclamation',
+                        success: 'fas fa-circle-check',
+                        info: 'fas fa-circle-info',
+                    }[this.current.variant] || 'fas fa-circle-question';
+                },
+
+                ask: function (options) {
+                    var self = this;
+                    var picked = {};
+
+                    /* A second question replaces the first, which counts as a no. */
+                    this.answer(false);
+
+                    Object.keys(defaults).forEach(function (key) {
+                        if (options[key] !== undefined && options[key] !== null && options[key] !== '') {
+                            picked[key] = String(options[key]);
+                        }
+                    });
+
+                    this.current = Object.assign({}, defaults, picked);
+                    this.open = true;
+                    lockScroll();
+
+                    /* Focus the safe choice, so a stray Enter never confirms. */
+                    this.$nextTick(function () {
+                        if (self.$refs.cancel) {
+                            self.$refs.cancel.focus();
+                        }
+                    });
+
+                    return new Promise(function (resolve) {
+                        self.resolve = resolve;
+                    });
+                },
+
+                answer: function (ok) {
+                    if (! this.resolve) {
+                        return;
+                    }
+
+                    var resolve = this.resolve;
+
+                    this.resolve = null;
+                    this.open = false;
+                    unlockScroll();
+
+                    resolve(ok === true);
+                },
+            };
+        },
+
+        /** Accordion: tracks which <x-avian::accordion.item> keys are open. */
+        auiAccordion: function (config) {
+            config = config || {};
+
+            return {
+                multiple: config.multiple === true,
+                active: [],
+
+                isOpen: function (key) {
+                    return this.active.indexOf(key) !== -1;
+                },
+
+                expand: function (key) {
+                    if (this.isOpen(key)) {
+                        return;
+                    }
+
+                    this.active = this.multiple ? this.active.concat([key]) : [key];
+                },
+
+                collapse: function (key) {
+                    this.active = this.active.filter(function (item) {
+                        return item !== key;
+                    });
+                },
+
+                toggle: function (key) {
+                    this.isOpen(key) ? this.collapse(key) : this.expand(key);
                 },
             };
         },
@@ -1019,6 +1261,14 @@
         closeModal: function (name) {
             window.dispatchEvent(new CustomEvent('aui-modal-close', { detail: { name: name || null } }));
         },
+        /* Drawers share the modal's events. */
+        openDrawer: function (name) {
+            window.AvianUI.openModal(name);
+        },
+        closeDrawer: function (name) {
+            window.AvianUI.closeModal(name);
+        },
+        confirm: confirmDialog,
     };
 
     document.addEventListener('alpine:init', function () {

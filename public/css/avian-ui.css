@@ -2182,6 +2182,506 @@ body.aui-scroll-locked {
 }
 
 /* ==========================================================================
+   Breadcrumbs
+   ========================================================================== */
+
+.aui-breadcrumbs-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 13px;
+}
+
+.aui-breadcrumbs-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+
+.aui-breadcrumbs-item + .aui-breadcrumbs-item::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    margin-right: 2px;
+    border-top: 1.5px solid var(--aui-slate-300);
+    border-right: 1.5px solid var(--aui-slate-300);
+    transform: rotate(45deg);
+}
+
+.aui-breadcrumbs-link,
+.aui-breadcrumbs-current {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.aui-breadcrumbs-link {
+    color: var(--aui-text-muted);
+    text-decoration: none;
+    transition: color var(--aui-transition-fast);
+}
+
+.aui-breadcrumbs-link:hover {
+    color: var(--aui-primary);
+}
+
+.aui-breadcrumbs-current {
+    font-weight: 600;
+    color: var(--aui-slate-800);
+}
+
+.aui-breadcrumbs + .aui-page-header {
+    margin-top: 12px;
+}
+
+/* ==========================================================================
+   Accordion
+   ========================================================================== */
+
+.aui-accordion {
+    background: var(--aui-surface);
+    border: 1px solid var(--aui-border-soft);
+    border-radius: var(--aui-radius-lg);
+    overflow: hidden;
+}
+
+.aui-accordion-flush {
+    background: none;
+    border: 0;
+    border-radius: 0;
+}
+
+.aui-accordion-item + .aui-accordion-item {
+    border-top: 1px solid var(--aui-border-soft);
+}
+
+.aui-accordion-heading {
+    margin: 0;
+    font-size: inherit;
+    font-weight: inherit;
+}
+
+.aui-accordion-trigger {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 16px 20px;
+    background: none;
+    border: 0;
+    font-family: inherit;
+    text-align: left;
+    color: var(--aui-slate-800);
+    cursor: pointer;
+    transition: background var(--aui-transition-fast);
+}
+
+.aui-accordion-trigger:hover {
+    background: var(--aui-slate-50);
+}
+
+.aui-accordion-trigger:focus-visible {
+    outline: none;
+    box-shadow: inset 0 0 0 3px var(--aui-ring);
+}
+
+.aui-accordion-icon {
+    flex-shrink: 0;
+    width: 18px;
+    text-align: center;
+    color: var(--aui-primary);
+}
+
+.aui-accordion-label {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.aui-accordion-title {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.aui-accordion-subtitle {
+    font-size: 12px;
+    color: var(--aui-text-muted);
+}
+
+.aui-accordion-arrow {
+    flex-shrink: 0;
+    font-size: 12px;
+    color: var(--aui-slate-400);
+    transition: transform var(--aui-transition-fast);
+}
+
+.aui-accordion-item.is-open .aui-accordion-arrow {
+    transform: rotate(180deg);
+}
+
+.aui-accordion-body {
+    padding: 0 20px 18px;
+    font-size: var(--aui-font-size);
+    line-height: 1.6;
+    color: var(--aui-text);
+}
+
+.aui-accordion-flush .aui-accordion-trigger,
+.aui-accordion-flush .aui-accordion-body {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.aui-accordion-flush .aui-accordion-trigger:hover {
+    background: none;
+    color: var(--aui-primary-darker);
+}
+
+/* ==========================================================================
+   Drawer
+   ========================================================================== */
+
+.aui-drawer-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(15, 23, 42, 0.45);
+}
+
+.aui-drawer {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    width: 420px;
+    max-width: 100%;
+    background: var(--aui-surface);
+    box-shadow: var(--aui-shadow-overlay);
+}
+
+.aui-drawer-right {
+    right: 0;
+}
+
+.aui-drawer-left {
+    left: 0;
+}
+
+.aui-drawer-sm {
+    width: 320px;
+}
+
+.aui-drawer-lg {
+    width: 640px;
+}
+
+.aui-drawer-xl {
+    width: 880px;
+}
+
+/* The overlay carries the transition classes; the panel follows them, so the
+   fade and the slide share one timeline. */
+.aui-drawer-transition,
+.aui-drawer-transition > .aui-drawer {
+    transition: opacity var(--aui-transition-slow), transform var(--aui-transition-slow);
+}
+
+.aui-drawer-closed {
+    opacity: 0;
+}
+
+.aui-drawer-closed > .aui-drawer-right {
+    transform: translateX(100%);
+}
+
+.aui-drawer-closed > .aui-drawer-left {
+    transform: translateX(-100%);
+}
+
+.aui-drawer-header {
+    display: flex;
+    flex-shrink: 0;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 20px 22px;
+    border-bottom: 1px solid var(--aui-border-soft);
+}
+
+.aui-drawer-subtitle {
+    margin: 4px 0 0;
+    font-size: 12px;
+    color: var(--aui-text-muted);
+}
+
+.aui-drawer-body {
+    flex: 1;
+    min-height: 0;
+    padding: 22px;
+    overflow-y: auto;
+    font-size: var(--aui-font-size);
+    color: var(--aui-text);
+}
+
+.aui-drawer-footer {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 22px;
+    background: var(--aui-surface-muted);
+    border-top: 1px solid var(--aui-border-soft);
+}
+
+/* ==========================================================================
+   Confirm dialog
+   ========================================================================== */
+
+.aui-confirm-overlay {
+    z-index: 1200;
+    align-items: center;
+}
+
+.aui-confirm-body {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.aui-confirm-icon {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: var(--aui-radius-full);
+    font-size: 17px;
+    background: var(--aui-primary-light);
+    color: var(--aui-primary-darker);
+}
+
+.aui-confirm-icon-danger {
+    background: var(--aui-danger-soft);
+    color: var(--aui-danger-strong);
+}
+
+.aui-confirm-icon-warning {
+    background: var(--aui-warning-soft);
+    color: var(--aui-warning-strong);
+}
+
+.aui-confirm-icon-success {
+    background: var(--aui-success-soft);
+    color: var(--aui-success-strong);
+}
+
+.aui-confirm-icon-info {
+    background: var(--aui-info-soft);
+    color: var(--aui-info-strong);
+}
+
+.aui-confirm-content {
+    min-width: 0;
+    padding-top: 2px;
+}
+
+.aui-confirm-message {
+    margin: 6px 0 0;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--aui-text-muted);
+}
+
+/* ==========================================================================
+   Stat
+   ========================================================================== */
+
+.aui-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 18px 20px;
+    background: var(--aui-surface);
+    border: 1px solid var(--aui-border-soft);
+    border-radius: var(--aui-radius-lg);
+    box-shadow: var(--aui-shadow-card);
+    color: var(--aui-text);
+    text-decoration: none;
+}
+
+.aui-stat-link {
+    transition: border-color var(--aui-transition), box-shadow var(--aui-transition);
+}
+
+.aui-stat-link:hover {
+    border-color: var(--aui-primary);
+    box-shadow: var(--aui-shadow-md);
+}
+
+.aui-stat-main {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.aui-stat-text {
+    min-width: 0;
+}
+
+.aui-stat-label {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--aui-text-muted);
+}
+
+.aui-stat-value {
+    margin: 6px 0 0;
+    font-family: var(--aui-font-display);
+    font-size: 26px;
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: var(--aui-heading);
+    font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
+}
+
+.aui-stat-icon {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--aui-radius-md);
+    font-size: 16px;
+    background: var(--aui-primary-light);
+    color: var(--aui-primary-darker);
+}
+
+.aui-stat-icon-success {
+    background: var(--aui-success-soft);
+    color: var(--aui-success-strong);
+}
+
+.aui-stat-icon-warning {
+    background: var(--aui-warning-soft);
+    color: var(--aui-warning-strong);
+}
+
+.aui-stat-icon-danger {
+    background: var(--aui-danger-soft);
+    color: var(--aui-danger-strong);
+}
+
+.aui-stat-icon-info {
+    background: var(--aui-info-soft);
+    color: var(--aui-info-strong);
+}
+
+.aui-stat-icon-neutral {
+    background: var(--aui-slate-100);
+    color: var(--aui-slate-600);
+}
+
+.aui-stat-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 8px;
+    margin: 0;
+    font-size: 12px;
+}
+
+.aui-stat-change {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: var(--aui-radius-full);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.aui-stat-change-good {
+    background: var(--aui-success-soft);
+    color: var(--aui-success-strong);
+}
+
+.aui-stat-change-bad {
+    background: var(--aui-danger-soft);
+    color: var(--aui-danger-strong);
+}
+
+.aui-stat-change-flat {
+    background: var(--aui-slate-100);
+    color: var(--aui-slate-600);
+}
+
+.aui-stat-description {
+    color: var(--aui-text-muted);
+}
+
+/* ==========================================================================
+   Divider
+   ========================================================================== */
+
+.aui-divider {
+    margin: 20px 0;
+    border: 0;
+    border-top: 1px solid var(--aui-border);
+}
+
+.aui-divider-labelled {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-top: 0;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--aui-slate-400);
+}
+
+.aui-divider-labelled::before,
+.aui-divider-labelled::after {
+    content: "";
+    flex: 1;
+    border-top: 1px solid var(--aui-border);
+}
+
+.aui-divider-left::before,
+.aui-divider-right::after {
+    flex: 0 0 16px;
+}
+
+.aui-divider-vertical {
+    display: inline-block;
+    align-self: stretch;
+    width: 1px;
+    min-height: 1em;
+    margin: 0 4px;
+    background: var(--aui-border);
+}
+
+/* ==========================================================================
    Layout helpers
    ========================================================================== */
 
@@ -2283,5 +2783,16 @@ body.aui-scroll-locked {
 
     .aui-modal-overlay {
         padding: 16px;
+    }
+
+    .aui-drawer-footer {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+}
+
+@media (max-width: 640px) {
+    .aui-drawer {
+        width: 100%;
     }
 }
