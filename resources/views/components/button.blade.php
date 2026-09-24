@@ -11,9 +11,19 @@
     would break under `wire:navigate`, so only ask for it on same-app links:
 
         <x-avian::button href="{{ route('dashboard') }}" navigate>Dashboard</x-avian::button>
+
+    `outline` and `ghost` are shapes, not colors on their own — pair either
+    with `color` (`primary`, `secondary`, `success`, `warning`, `danger`,
+    `info`) to pick one. Without `color` they fall back to `primary`
+    (outline) or `secondary` (ghost); `color` is ignored on every other
+    variant, which is already a color (`primary`, `success`, ...):
+
+        <x-avian::button variant="outline" color="danger">Remove</x-avian::button>
+        <x-avian::button variant="ghost" color="success">Approve</x-avian::button>
 --}}
 @props([
     'variant' => 'primary',
+    'color' => null,
     'size' => null,
     'type' => 'button',
     'href' => null,
@@ -39,9 +49,15 @@
         ? '$dispatch(\'aui-modal-open\', { name: '.Illuminate\Support\Js::from($modal).' })'
         : null;
 
+    // `color` only applies to the "shape" variants — every other variant is
+    // already a color of its own (primary, success, light, link, ...).
+    $resolvedVariant = in_array($variant, ['outline', 'ghost'], true) && filled($color)
+        ? $variant.'-'.$color
+        : $variant;
+
     $classes = [
         'aui-btn',
-        'aui-btn-'.$variant,
+        'aui-btn-'.$resolvedVariant,
         'aui-btn-'.$size => filled($size),
         'aui-btn-icon' => $iconOnly,
         'aui-btn-block' => $block,

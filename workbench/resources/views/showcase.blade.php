@@ -1,14 +1,46 @@
 @php
-    $users = new \Illuminate\Pagination\LengthAwarePaginator(
-        items: [
-            ['Ada Lovelace', 'Administrator', 'success', 'Active'],
-            ['Grace Hopper', 'Editor', 'warning', 'Pending'],
+    // Each sidebar entry is a page under resources/views/showcase/, keyed by its view name.
+    $nav = [
+        'General' => [
+            'getting-started' => ['label' => 'Getting started', 'icon' => 'fas fa-house'],
         ],
-        total: 42,
-        perPage: 2,
-        currentPage: 2,
-        options: ['path' => '/', 'pageName' => 'page'],
-    );
+        'Actions & display' => [
+            'components.button' => ['label' => 'Button', 'icon' => 'fas fa-hand-pointer'],
+            'components.badge' => ['label' => 'Badge', 'icon' => 'fas fa-certificate'],
+            'components.avatar' => ['label' => 'Avatar', 'icon' => 'fas fa-circle-user'],
+            'components.progress' => ['label' => 'Progress', 'icon' => 'fas fa-chart-simple'],
+            'components.spinner' => ['label' => 'Spinner', 'icon' => 'fas fa-spinner'],
+        ],
+        'Layout' => [
+            'components.page-header' => ['label' => 'Page header', 'icon' => 'fas fa-heading'],
+            'components.card' => ['label' => 'Card', 'icon' => 'fas fa-square'],
+        ],
+        'Forms' => [
+            'forms.form' => ['label' => 'Form & layout', 'icon' => 'fas fa-pen-to-square'],
+            'forms.field' => ['label' => 'Field, label & error', 'icon' => 'fas fa-tag'],
+            'forms.input' => ['label' => 'Input', 'icon' => 'fas fa-i-cursor'],
+            'forms.textarea' => ['label' => 'Textarea', 'icon' => 'fas fa-align-left'],
+            'forms.select' => ['label' => 'Select', 'icon' => 'fas fa-list'],
+            'forms.searchable-select' => ['label' => 'Searchable select', 'icon' => 'fas fa-magnifying-glass'],
+            'forms.multi-select' => ['label' => 'Multi select', 'icon' => 'fas fa-list-check'],
+            'forms.datepicker' => ['label' => 'Datepicker', 'icon' => 'fas fa-calendar-days'],
+            'forms.file' => ['label' => 'File', 'icon' => 'fas fa-paperclip'],
+            'forms.checkbox' => ['label' => 'Checkbox', 'icon' => 'fas fa-square-check'],
+            'forms.radio' => ['label' => 'Radio', 'icon' => 'fas fa-circle-dot'],
+            'forms.switch' => ['label' => 'Switch', 'icon' => 'fas fa-toggle-on'],
+        ],
+        'Data & navigation' => [
+            'components.table' => ['label' => 'Table', 'icon' => 'fas fa-table'],
+            'components.pagination' => ['label' => 'Pagination', 'icon' => 'fas fa-ellipsis'],
+            'components.tabs' => ['label' => 'Tabs', 'icon' => 'fas fa-folder'],
+            'components.dropdown' => ['label' => 'Dropdown', 'icon' => 'fas fa-caret-down'],
+        ],
+        'Overlays & feedback' => [
+            'components.modal' => ['label' => 'Modal', 'icon' => 'fas fa-window-restore'],
+            'components.alert' => ['label' => 'Alert', 'icon' => 'fas fa-circle-info'],
+            'components.empty' => ['label' => 'Empty state', 'icon' => 'fas fa-inbox'],
+        ],
+    ];
 @endphp
 <!DOCTYPE html>
 <html lang="en" data-theme="emerald-green">
@@ -32,150 +64,174 @@
     <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/mask@3.x.x/dist/cdn.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
+    {{-- The datepicker leaves flatpickr to the host app; the workbench loads it the documented way. --}}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.flatpickr-input').forEach((input) => {
+                flatpickr(input, {
+                    mode: input.dataset.fpMode,
+                    dateFormat: input.dataset.fpDateFormat,
+                    enableTime: input.dataset.fpEnableTime === 'true',
+                    minDate: input.dataset.fpMinDate || null,
+                    maxDate: input.dataset.fpMaxDate || null,
+                });
+            });
+        });
+    </script>
+
     <style>
-        body { margin: 0; padding: 30px; background: #f5f7fa; font-family: var(--aui-font-sans); }
-        .showcase { max-width: 1080px; margin: 0 auto; }
-        .showcase > * + * { margin-top: 24px; }
+        body { margin: 0; padding: 0; background: #f5f7fa; font-family: var(--aui-font-sans); }
+        [x-cloak] { display: none !important; }
+
+        .aui-showcase { display: flex; align-items: flex-start; min-height: 100vh; }
+
+        .aui-showcase-sidebar {
+            position: sticky;
+            top: 0;
+            flex: 0 0 250px;
+            box-sizing: border-box;
+            height: 100vh;
+            overflow-y: auto;
+            padding: 24px 14px;
+            background: #ffffff;
+            border-right: 1px solid #e5e9f0;
+        }
+        .aui-showcase-brand { padding: 0 10px 18px; }
+        .aui-showcase-brand strong { display: block; font-family: var(--aui-font-display); font-size: 18px; }
+        .aui-showcase-brand span { color: #6b7280; font-size: 13px; }
+
+        .aui-showcase-nav { display: flex; flex-direction: column; gap: 2px; }
+        .aui-showcase-nav-group {
+            padding: 16px 10px 6px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            color: #9ca3af;
+        }
+        .aui-showcase-nav-group:first-child { padding-top: 0; }
+        .aui-showcase-nav button {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            border: 0;
+            background: transparent;
+            text-align: left;
+            padding: 9px 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            color: #374151;
+            cursor: pointer;
+        }
+        .aui-showcase-nav button i { width: 16px; text-align: center; color: #9ca3af; }
+        .aui-showcase-nav button:hover { background: #f3f4f6; }
+        .aui-showcase-nav button.is-active { background: var(--aui-primary, #16a34a); color: #fff; }
+        .aui-showcase-nav button.is-active i { color: #fff; }
+
+        .aui-showcase-content { flex: 1 1 auto; min-width: 0; padding: 30px; max-width: 1080px; margin: 0 auto; }
+        .aui-showcase-content > * + * { margin-top: 24px; }
+        .aui-showcase-section > * + * { margin-top: 24px; }
+
+        .aui-showcase-code {
+            margin: 0;
+            padding: 14px 16px;
+            background: #0f172a;
+            color: #e2e8f0;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-size: 12.5px;
+            line-height: 1.6;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        }
+
+        .aui-showcase-lead { margin: 0 0 20px; font-size: 14px; line-height: 1.65; color: #4b5563; }
+        .aui-showcase-text { margin: 0 0 10px; font-size: 13.5px; line-height: 1.6; color: #4b5563; }
+        .aui-showcase-note { margin: 10px 0 0; font-size: 12.5px; color: #6b7280; }
+        .aui-showcase-lead code, .aui-showcase-text code, .aui-showcase-list code, .aui-showcase-note code, .aui-showcase-props code {
+            padding: 1px 5px;
+            background: #f1f5f9;
+            border-radius: 4px;
+            font-size: .92em;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            color: #0f172a;
+        }
+        .aui-showcase-props code.aui-showcase-type { background: transparent; padding: 0; color: #64748b; }
+        .aui-showcase-props td { vertical-align: top; }
+        .aui-showcase-props td:nth-child(-n+3) { white-space: nowrap; }
+
+        .aui-showcase-theme.is-active,
+        .aui-showcase-theme.is-active:hover { background: var(--aui-primary); border-color: var(--aui-primary); color: #fff; }
+
+        .aui-showcase-demo {
+            padding: 22px;
+            background: #f8fafc;
+            border: 1px dashed #dbe1ea;
+            border-radius: 12px;
+        }
+
+        .aui-showcase-block { margin-top: 30px; }
+        .aui-showcase-heading {
+            margin: 0 0 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eef1f5;
+            font-family: var(--aui-font-display);
+            font-size: 15px;
+            color: #111827;
+        }
+        .aui-showcase-list { margin: 0; padding-left: 20px; font-size: 13.5px; line-height: 1.7; color: #4b5563; }
+        .aui-showcase-list li + li { margin-top: 4px; }
+
+        .aui-showcase-example + .aui-showcase-example { margin-top: 22px; }
+        .aui-showcase-example-title { margin: 0 0 6px; font-size: 13.5px; font-weight: 600; color: #111827; }
+        .aui-showcase-example .aui-showcase-code { margin-top: 0; }
+
+        @media (max-width: 860px) {
+            .aui-showcase { display: block; }
+            .aui-showcase-sidebar { position: static; height: auto; width: auto; border-right: 0; border-bottom: 1px solid #e5e9f0; }
+            .aui-showcase-content { max-width: none; padding: 16px; }
+            .aui-showcase-content .aui-form-grid { grid-template-columns: minmax(0, 1fr); }
+        }
     </style>
 </head>
 <body>
-    <div class="showcase">
-        <x-avian::page-header title="Avian UI" subtitle="Component showcase served by the workbench.">
-            <x-slot:actions>
-                <x-avian::button variant="light" icon="fas fa-rotate">Refresh</x-avian::button>
-                <x-avian::button icon="fas fa-plus" modal="demo">
-                    New record
-                </x-avian::button>
-            </x-slot:actions>
-        </x-avian::page-header>
+    <div class="aui-showcase" x-data="{ section: 'getting-started' }">
+        <aside class="aui-showcase-sidebar">
+            <div class="aui-showcase-brand">
+                <strong>Avian UI</strong>
+                <span>Component showcase</span>
+            </div>
 
-        <x-avian::alert variant="info" dismissible>
-            Every class in this page comes from the packaged stylesheet. Switch the
-            <code>data-theme</code> attribute on <code>&lt;html&gt;</code> to repaint it.
-        </x-avian::alert>
+            <nav class="aui-showcase-nav">
+                @foreach ($nav as $group => $items)
+                    <span class="aui-showcase-nav-group">{{ $group }}</span>
 
-        <x-avian::card title="Buttons" subtitle="Variants, sizes and states">
-            <div class="aui-row" style="flex-wrap: wrap">
-                @foreach (['primary', 'secondary', 'success', 'warning', 'danger', 'info', 'light', 'outline', 'ghost'] as $variant)
-                    <x-avian::button :variant="$variant">{{ ucfirst($variant) }}</x-avian::button>
+                    @foreach ($items as $key => $item)
+                        <button
+                            type="button"
+                            x-on:click="section = '{{ $key }}'; window.scrollTo(0, 0)"
+                            x-bind:class="section === '{{ $key }}' ? 'is-active' : ''"
+                        >
+                            <i class="{{ $item['icon'] }}" aria-hidden="true"></i>
+                            {{ $item['label'] }}
+                        </button>
+                    @endforeach
                 @endforeach
-            </div>
+            </nav>
+        </aside>
 
-            <div class="aui-row" style="margin-top: 14px">
-                <x-avian::button size="sm">Small</x-avian::button>
-                <x-avian::button>Default</x-avian::button>
-                <x-avian::button size="lg">Large</x-avian::button>
-                <x-avian::button loading>Saving</x-avian::button>
-                <x-avian::button disabled>Disabled</x-avian::button>
-                <x-avian::button href="#" variant="link">Link button</x-avian::button>
-            </div>
-
-            <div class="aui-row" style="margin-top: 14px">
-                <x-avian::button icon="fas fa-pen" icon-only label="Edit" variant="light" />
-                <x-avian::button icon="fas fa-trash" icon-only label="Delete" variant="light" />
-                <x-avian::button icon="fas fa-plus" icon-only label="Add" size="sm" />
-                <x-avian::button icon="fas fa-check" icon-only label="Approve" size="lg" variant="success" />
-            </div>
-        </x-avian::card>
-
-        <x-avian::card title="Badges & status" subtitle="Pills, avatars and progress">
-            <div class="aui-row" style="flex-wrap: wrap">
-                <x-avian::badge variant="success" dot>Complete</x-avian::badge>
-                <x-avian::badge variant="warning" dot>Ongoing</x-avian::badge>
-                <x-avian::badge variant="danger" dot>Not started</x-avian::badge>
-                <x-avian::badge variant="primary">Primary</x-avian::badge>
-                <x-avian::badge variant="info" uppercase>Information</x-avian::badge>
-                <x-avian::avatar name="Ada Lovelace" />
-                <x-avian::avatar name="Grace Hopper" size="sm" />
-            </div>
-
-            <x-avian::progress :value="68" label="Completion" show-value style="margin-top: 18px" />
-        </x-avian::card>
-
-        <x-avian::card title="Form" subtitle="Labels, hints, validation and Alpine-backed controls">
-            <x-avian::form action="#" method="POST" files>
-                <div class="aui-form-grid">
-                    <x-avian::input name="name" label="Full name" placeholder="Ada Lovelace" required />
-                    <x-avian::input name="email" type="email" label="Email" icon="fas fa-envelope" />
-                    <x-avian::input name="website" label="Website" prefix="https://" suffix=".com" />
-                    <x-avian::select
-                        name="role"
-                        label="Role"
-                        placeholder="Choose a role"
-                        :options="['admin' => 'Administrator', 'editor' => 'Editor', 'viewer' => 'Viewer']"
-                    />
-                    <x-avian::searchable-select
-                        name="country"
-                        label="Country"
-                        placeholder="Choose a country"
-                        :options="['us' => 'United States', 'id' => 'Indonesia', 'jp' => 'Japan', 'de' => 'Germany']"
-                    />
-                    <x-avian::multi-select
-                        name="skills"
-                        label="Skills"
-                        placeholder="Pick a few skills"
-                        :options="['php' => 'PHP', 'laravel' => 'Laravel', 'js' => 'JavaScript', 'css' => 'CSS', 'sql' => 'SQL', 'go' => 'Go']"
-                        :value="['php', 'laravel']"
-                    />
-                    <x-avian::input name="budget" label="Budget" prefix="Rp" numeric hint="Rounded to the nearest thousand." />
-                    <x-avian::file name="attachment" label="Attachment" />
-                    <x-avian::textarea class="aui-form-full" name="notes" label="Notes" rows="3" />
-                </div>
-
-                <div class="aui-stack" style="margin-top: 6px">
-                    <x-avian::checkbox name="terms" label="I accept the terms" hint="You can revoke this at any time." />
-                    <div>
-                        <x-avian::label>Plan</x-avian::label>
-                        <x-avian::radio name="plan" value="basic" label="Basic" inline checked />
-                        <x-avian::radio name="plan" value="pro" label="Pro" inline />
-                    </div>
-                    <x-avian::switch name="active" label="Active" checked />
-                </div>
-
-                <div class="aui-form-actions">
-                    <x-avian::button variant="light" type="reset">Cancel</x-avian::button>
-                    <x-avian::button type="submit" icon="fas fa-check">Save</x-avian::button>
-                </div>
-            </x-avian::form>
-        </x-avian::card>
-
-        <x-avian::card title="Table" :padded="false">
-            <x-avian::table :headers="['Name', 'Role', 'Status', '']" :paginator="$users">
-                @foreach ($users as [$name, $role, $variant, $status])
-                    <tr>
-                        <td>{{ $name }}</td>
-                        <td>{{ $role }}</td>
-                        <td><x-avian::badge :variant="$variant" dot>{{ $status }}</x-avian::badge></td>
-                        <td class="aui-table-align-right">
-                            <x-avian::dropdown align="right" size="sm" label="Actions">
-                                <x-avian::dropdown.item icon="fas fa-pen">Edit</x-avian::dropdown.item>
-                                <div class="aui-dropdown-divider"></div>
-                                <x-avian::dropdown.item icon="fas fa-trash" danger>Delete</x-avian::dropdown.item>
-                            </x-avian::dropdown>
-                        </td>
-                    </tr>
+        <main class="aui-showcase-content">
+            @foreach ($nav as $items)
+                @foreach (array_keys($items) as $key)
+                    <section class="aui-showcase-section" x-show="section === '{{ $key }}'" x-cloak>
+                        @include('showcase.'.$key)
+                    </section>
                 @endforeach
-            </x-avian::table>
-        </x-avian::card>
-
-        <x-avian::card title="Tabs" subtitle="line (default), pill and segmented variants">
-            <x-avian::tabs :tabs="['overview' => 'Overview', 'activity' => 'Activity']">
-                <x-avian::tabs.panel name="overview">The first panel is shown by default.</x-avian::tabs.panel>
-                <x-avian::tabs.panel name="activity">
-                    <x-avian::empty title="No activity yet" text="Actions will show up here." />
-                </x-avian::tabs.panel>
-            </x-avian::tabs>
-
-            <x-avian::tabs :tabs="['overview' => 'Overview', 'activity' => 'Activity']" variant="pill" style="margin-top: 24px">
-                <x-avian::tabs.panel name="overview">Pill-variant tabs stand alone, no shared underline.</x-avian::tabs.panel>
-                <x-avian::tabs.panel name="activity">Same state, different look.</x-avian::tabs.panel>
-            </x-avian::tabs>
-
-            <x-avian::tabs :tabs="['overview' => 'Overview', 'activity' => 'Activity']" variant="segmented" style="margin-top: 24px">
-                <x-avian::tabs.panel name="overview">Segmented tabs sit inside a grouped track.</x-avian::tabs.panel>
-                <x-avian::tabs.panel name="activity">Same state, different look.</x-avian::tabs.panel>
-            </x-avian::tabs>
-        </x-avian::card>
+            @endforeach
+        </main>
     </div>
 
     <x-avian::modal name="demo" title="New record" size="lg">

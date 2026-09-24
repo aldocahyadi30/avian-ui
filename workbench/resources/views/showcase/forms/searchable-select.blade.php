@@ -1,0 +1,158 @@
+@php
+    $props = [
+        ['name', 'string|null', 'null', 'Name of the hidden input that carries the selected value.'],
+        ['options', 'array|Collection|null', 'null', 'value => label pairs. Leave it out (null) to write the options yourself in the slot.'],
+        ['value', 'mixed', 'null', 'Selected value. Falls back to old input when wire:model is not used.'],
+        ['placeholder', 'string', "'Select an option'", 'Trigger text when nothing is selected.'],
+        ['search-placeholder', 'string', "'Search...'", 'Placeholder of the search box inside the dropdown.'],
+        ['empty-text', 'string', "'No results found.'", 'Shown when the search matches nothing.'],
+        ['search-model', 'string|null', 'null', 'Livewire only: property that receives the search term, so the server filters `options`.'],
+        ['search-debounce', 'string', "'250ms'", 'Debounce for the search-model request.'],
+        ['label', 'string|null', 'null', 'Label shown above the control.'],
+        ['hint', 'string|null', 'null', 'Helper text under the control.'],
+        ['error', 'string|null', 'null', 'Force an error message; otherwise read from $errors.'],
+        ['error-bag', 'string|null', 'null', 'Named error bag to read from.'],
+        ['required', 'bool', 'false', 'Asterisk on the label. (A hidden input cannot be natively required — validate on the server.)'],
+        ['size', "'sm'|'lg'|null", 'null', 'Control height.'],
+        ['disabled', 'bool', 'false', 'Disables the trigger so the dropdown cannot open.'],
+        ['field', 'bool', 'true', 'Set :field="false" to render just the control.'],
+    ];
+
+    $examples = [
+        [
+            'title' => 'Basic',
+            'text' => 'Same API as the native select. Filtering happens in the browser against the option labels.',
+            'code' => <<<'BLADE'
+                <x-avian::searchable-select
+                    name="country"
+                    label="Country"
+                    placeholder="Choose a country"
+                    :options="['us' => 'United States', 'id' => 'Indonesia', 'jp' => 'Japan']"
+                />
+                BLADE,
+        ],
+        [
+            'title' => 'Options from the database',
+            'text' => 'A Collection is accepted as-is, no ->all() needed.',
+            'code' => <<<'BLADE'
+                <x-avian::searchable-select
+                    name="customer_id"
+                    label="Customer"
+                    :options="$customers->pluck('name', 'id')"
+                    :value="old('customer_id', $order->customer_id)"
+                />
+                BLADE,
+        ],
+        [
+            'title' => 'Custom option markup',
+            'text' => 'Drop `options` and render <x-avian::searchable-select.option> rows yourself. `label` is the plain text shown in the trigger and used for searching; the slot is what the row looks like. Pass the current value to `selected` so the right row is highlighted on first paint.',
+            'code' => <<<'BLADE'
+                <x-avian::searchable-select name="item_no" label="Item" :value="$itemNo">
+                    @foreach ($items as $item)
+                        <x-avian::searchable-select.option :value="$item->id" :label="$item->name" :selected="$itemNo">
+                            <strong>{{ $item->code }}</strong> <small>{{ $item->name }}</small>
+                        </x-avian::searchable-select.option>
+                    @endforeach
+                </x-avian::searchable-select>
+                BLADE,
+        ],
+        [
+            'title' => 'Livewire',
+            'text' => 'Bind with wire:model — any modifier works. Also pass :value so the trigger label is correct on the first render.',
+            'code' => <<<'BLADE'
+                <x-avian::searchable-select
+                    wire:model.live="filter.status"
+                    :value="$filter['status']"
+                    :options="$statusOptions"
+                    label="Status"
+                />
+                BLADE,
+        ],
+        [
+            'title' => 'Server-side search (Livewire, large tables)',
+            'text' => 'For thousands of rows, don\'t render them all. Give `search-model` a property; the search box writes to it (debounced) and your component returns only the matching options. The selected label stays visible even when the search filters it out.',
+            'code' => <<<'BLADE'
+                {{-- Blade --}}
+                <x-avian::searchable-select
+                    wire:model.live="customerId"
+                    :value="$customerId"
+                    :options="$this->customerOptions"
+                    search-model="customerSearch"
+                    label="Customer"
+                />
+
+                // Livewire component
+                public ?int $customerId = null;
+                public string $customerSearch = '';
+
+                #[Computed]
+                public function customerOptions(): array
+                {
+                    return Customer::where('name', 'like', "%{$this->customerSearch}%")
+                        ->limit(50)
+                        ->pluck('name', 'id')
+                        ->all();
+                }
+                BLADE,
+        ],
+    ];
+@endphp
+
+<x-avian::card title="Searchable select" subtitle="Dropdown with a search box">
+    <p class="aui-showcase-lead">
+        A replacement for the native select when the list is too long to scroll through: countries,
+        customers, products. It behaves like <code>&lt;x-avian::select&gt;</code> — same props, same
+        validation and old input — and submits a single value through a hidden input.
+    </p>
+
+    <div class="aui-showcase-demo">
+        <div class="aui-form-grid">
+            <x-avian::searchable-select
+                name="searchable_country"
+                label="Country"
+                placeholder="Choose a country"
+                :options="['us' => 'United States', 'id' => 'Indonesia', 'jp' => 'Japan', 'de' => 'Germany', 'fr' => 'France', 'br' => 'Brazil', 'au' => 'Australia', 'ca' => 'Canada']"
+            />
+            <x-avian::searchable-select
+                name="searchable_city"
+                label="City"
+                value="sby"
+                hint="Pre-selected through the value prop."
+                :options="['jkt' => 'Jakarta', 'sby' => 'Surabaya', 'bdg' => 'Bandung', 'mdn' => 'Medan']"
+            />
+            <x-avian::searchable-select name="searchable_item" label="Item (custom rows)" placeholder="Choose an item">
+                @foreach (['A-100' => 'Wall paint 5L', 'A-200' => 'Wood varnish 1L', 'A-300' => 'Primer 2.5L'] as $code => $itemName)
+                    <x-avian::searchable-select.option :value="$code" :label="$itemName">
+                        <strong>{{ $code }}</strong>&nbsp;<small>{{ $itemName }}</small>
+                    </x-avian::searchable-select.option>
+                @endforeach
+            </x-avian::searchable-select>
+            <x-avian::searchable-select
+                name="searchable_owner"
+                label="Owner"
+                required
+                error="Please choose an owner."
+                :options="['ada' => 'Ada Lovelace', 'grace' => 'Grace Hopper']"
+            />
+        </div>
+    </div>
+
+    <div class="aui-showcase-block">
+        <h4 class="aui-showcase-heading">How it works</h4>
+        <ul class="aui-showcase-list">
+            <li>Click the trigger (or focus it and press Enter) to open. Type to filter, use ↑ / ↓ to move, Enter to pick and Esc to close.</li>
+            <li>The chosen value is written to a hidden <code>&lt;input name="…"&gt;</code>, so it submits like a normal field.</li>
+            <li>The dropdown is teleported to <code>&lt;body&gt;</code>, so it is never clipped by a card, modal or scrolling table.</li>
+            <li>Requires Alpine and the package script (<code>&lt;x-avian::scripts /&gt;</code>) loaded before Alpine.</li>
+        </ul>
+    </div>
+
+    @include('showcase.partials.props')
+
+    <div class="aui-showcase-block">
+        <h4 class="aui-showcase-heading">Examples</h4>
+        @foreach ($examples as $example)
+            @include('showcase.partials.example', ['example' => $example])
+        @endforeach
+    </div>
+</x-avian::card>
