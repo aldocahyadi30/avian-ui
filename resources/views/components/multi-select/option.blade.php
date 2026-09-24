@@ -24,6 +24,7 @@
     type="button"
     wire:key="aui-multiselect-option-{{ $value }}"
     class="aui-combobox-item{{ $isActive ? ' active' : '' }}"
+    data-value="{{ $value }}"
     data-label="{{ $label }}"
     :class="{ active: isSelected(@js((string) $value)) }"
     x-bind:aria-selected="isSelected(@js((string) $value))"

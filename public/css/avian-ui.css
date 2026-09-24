@@ -892,6 +892,36 @@
     transform: rotate(180deg);
 }
 
+/* Clear button: a sibling laid over the trigger, since a <button> cannot
+   nest inside the trigger <button>. */
+.aui-combobox.is-clearable .aui-combobox-arrow {
+    margin-left: 28px;
+}
+
+.aui-combobox-clear {
+    position: absolute;
+    top: 50%;
+    right: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    background: none;
+    border: 0;
+    border-radius: var(--aui-radius-full);
+    font-size: 11px;
+    color: var(--aui-slate-400);
+    transform: translateY(-50%);
+    cursor: pointer;
+}
+
+.aui-combobox-clear:hover {
+    background: var(--aui-slate-100);
+    color: var(--aui-slate-700);
+}
+
 .aui-combobox-dropdown {
     position: fixed;
     z-index: 1100;
@@ -981,6 +1011,15 @@
 
 .aui-combobox-item.active .aui-combobox-item-check {
     opacity: 1;
+}
+
+.aui-combobox-create {
+    color: var(--aui-primary-darker);
+}
+
+.aui-combobox-create .fa-plus {
+    margin-right: 4px;
+    font-size: 11px;
 }
 
 .aui-combobox-empty {

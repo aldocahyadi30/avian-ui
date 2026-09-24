@@ -31,6 +31,16 @@
             @endforeach
         </x-avian::multi-select>
 
+    `clearable` adds a × button to the trigger that removes every pick.
+
+    `taggable` lets the user add values that are not in the list: when the
+    search term matches no option label, an `Add "…"` row (see
+    `create-text`) — or Enter with no row highlighted — adds the typed text as
+    both value and chip label. Backspace in an empty search box takes a typed
+    tag back into the box so it can be edited and re-added.
+
+        <x-avian::multi-select name="tags" :options="$tags" taggable clearable />
+
     The dropdown is teleported to <body> and positioned with fixed
     coordinates, so a card or a scrolling table wrapper cannot clip it.
 --}}
@@ -44,6 +54,9 @@
     'searchPlaceholder' => 'Search...',
     'emptyText' => 'No results found.',
     'max' => null,
+    'clearable' => false,
+    'taggable' => false,
+    'createText' => 'Add ":term"',
     'hint' => null,
     'error' => null,
     'errorBag' => null,
@@ -90,19 +103,24 @@
     {{-- Like searchable-select, per-render state goes through `data-*`
          attributes so the `x-data` expression stays constant across
          Livewire morphs and Alpine never re-initialises the component. --}}
-    <div x-data="auiMultiSelect({ max: @js($max === null ? null : (int) $max) })"
+    <div x-data="auiMultiSelect({
+        max: @js($max === null ? null : (int) $max),
+        taggable: @js((bool) $taggable),
+        createText: @js($createText),
+    })"
         x-modelable="values"
         {{ $modelAttributes }}
         data-aui-values="{{ json_encode($selected) }}"
         data-aui-labels="{{ json_encode((object) $labels) }}"
         x-ref="wrapper"
         x-on:click.window="if (open && ! $refs.wrapper.contains($event.target) && ! $refs.dropdown.contains($event.target)) close()"
-        {{ $rootAttributes->class(['aui-combobox', 'aui-multiselect', 'is-disabled' => $disabled]) }}
+        {{ $rootAttributes->class(['aui-combobox', 'aui-multiselect', 'is-clearable' => $clearable, 'is-disabled' => $disabled]) }}
         :class="{ 'is-open': open }">
         <div id="{{ $inputId }}" x-ref="trigger" role="combobox" tabindex="{{ $disabled ? '-1' : '0' }}"
             class="aui-select aui-combobox-trigger aui-multiselect-trigger{{ $size ? ' aui-select-' . $size : '' }}{{ filled($inputError) ? ' aui-select-invalid' : '' }}"
             x-on:click="toggle()" x-on:keydown.enter.prevent="toggle()" x-on:keydown.space.prevent="toggle()"
             x-on:keydown.down.prevent="if (! open) toggle()"
+            @if ($clearable) x-on:keydown.backspace.prevent="clear()" x-on:keydown.delete.prevent="clear()" @endif
             x-bind:aria-expanded="open" aria-haspopup="listbox"
             aria-invalid="{{ filled($inputError) ? 'true' : 'false' }}"
             @if ($disabled) aria-disabled="true" @endif>
@@ -131,6 +149,13 @@
             <i class="fas fa-chevron-down aui-combobox-arrow" aria-hidden="true"></i>
         </div>
 
+        @if ($clearable && ! $disabled)
+            <button type="button" class="aui-combobox-clear" x-show="values.length" x-cloak
+                x-on:click.stop="clear()" aria-label="Clear selection">
+                <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+        @endif
+
         @if ($inputName)
             <template x-for="item in values" :key="item">
                 <input type="hidden" name="{{ $inputName }}" :value="item">
@@ -147,7 +172,7 @@
                     <i class="fas fa-search" aria-hidden="true"></i>
                     <input type="text" x-ref="search" class="aui-combobox-search-input"
                         placeholder="{{ $searchPlaceholder }}" x-model="search" x-on:input="filter()"
-                        x-on:keydown.backspace="if (search === '' && values.length) remove(values[values.length - 1])">
+                        x-on:keydown.backspace="if (search === '' && values.length) { $event.preventDefault(); removeLast(); }">
                     <button type="button" class="aui-multiselect-clear" x-show="values.length" x-on:click="clear()">Clear</button>
                 </div>
 
@@ -158,6 +183,15 @@
                         @endforeach
                     @elseif ($slot->isNotEmpty())
                         {{ $slot }}
+                    @endif
+
+                    {{-- Kept after the options so arrowing through the list
+                         reaches matches first. --}}
+                    @if ($taggable)
+                        <button type="button" class="aui-combobox-item aui-combobox-create" hidden
+                            :hidden="!canCreate" x-on:click="create()" role="option">
+                            <span><i class="fas fa-plus" aria-hidden="true"></i> <span x-text="createLabel"></span></span>
+                        </button>
                     @endif
 
                     <p class="aui-combobox-empty" x-ref="empty" @if (filled($optionList) || $slot->isNotEmpty()) hidden @endif>

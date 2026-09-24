@@ -197,6 +197,7 @@ themselves from old input after a failed validation round trip.
 | `numeric` | input | Money-masked text field (see below) |
 | `options`, `placeholder` | select, searchable-select, multi-select | Options as `value => label` |
 | `search-placeholder`, `empty-text` | searchable-select, multi-select | Copy for the search box and empty state |
+| `clearable`, `taggable`, `create-text` | searchable-select, multi-select | Reset button; accept free-typed values (`:term` in `create-text` is replaced) |
 | `max` | multi-select | Cap how many values can be picked |
 | `inline` | checkbox, radio | Lay several out on one line |
 | `mode`, `enable-time`, `date-format`, `min-date`, `max-date` | datepicker | Flatpickr config, read from `data-fp-*` attributes |
@@ -261,6 +262,16 @@ it already owns the selected value through `wire:model` + `:value`:
 />
 ```
 
+Add `clearable` for a × button that resets the value, and `taggable` to let
+users submit a value that is not in the list — when the search term matches no
+option label, an `Add "…"` row (`create-text`, with `:term` replaced) picks the
+typed text as both value and label. Reopening a taggable select prefills the
+search box with the current label so it can be edited in place:
+
+```blade
+<x-avian::searchable-select name="city" :options="$cities" clearable taggable />
+```
+
 `multi-select` is the multiple-choice version of `searchable-select`: the same
 searchable dropdown, with each pick shown as a removable chip in the trigger.
 The dropdown stays open while picking, and Backspace in an empty search box
@@ -277,6 +288,11 @@ array, and validation messages for both `tags` and `tags.*` are shown:
     max="3"
 />
 ```
+
+`clearable` and `taggable` work here too: × on the trigger removes every pick,
+and a typed term that matches no option can be added as a chip (click the
+`Add "…"` row or press Enter). Backspace in an empty search box takes a typed
+tag back into the box for editing. Validate each item (`tags.*`) on the server.
 
 With Livewire, `wire:model` binds the whole array (through Alpine's
 `x-modelable`), so `.live` and the other modifiers work as usual. Drop

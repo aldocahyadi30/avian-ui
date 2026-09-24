@@ -54,11 +54,15 @@ to scan in a native dropdown — it adds a search box and filters client-side by
 default, so it needs no Livewire component of its own. Drop `options` and pass
 `<x-avian::searchable-select.option>` children for custom row markup, or pass
 `search-model` to hand filtering to the server instead (Livewire only, mirrors
-how `wire:model` + `:value` already own the selected value).
+how `wire:model` + `:value` already own the selected value). Add `clearable`
+for a × reset button, and `taggable` to accept free-typed values that are not
+in `options` (the value is its own label; validate it on the server since it is
+arbitrary input).
 
 Use `multi-select` when several values can be picked. It submits `name[]` (an
 array: validate `tags` and `tags.*`), shows picks as removable chips, accepts
-`max`, and binds the whole array with `wire:model` through `x-modelable`.
+`max`, `clearable` and `taggable` (free-typed tags; validate `tags.*`), and
+binds the whole array with `wire:model` through `x-modelable`.
 
 Pass `numeric` to `input` for a money-masked amount field
 (`<x-avian::input name="budget" numeric />`) — it renders as a text field

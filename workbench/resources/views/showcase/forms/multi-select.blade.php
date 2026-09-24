@@ -4,6 +4,9 @@
         ['options', 'array|Collection|null', 'null', 'value => label pairs. Leave it out (null) to write the options yourself in the slot.'],
         ['value', 'array|null', 'null', 'Pre-selected values. Falls back to old input when wire:model is not used.'],
         ['max', 'int|null', 'null', 'Maximum number of values that can be picked. Further options are ignored once reached.'],
+        ['clearable', 'bool', 'false', 'Adds a × button (and Backspace / Delete on the trigger) that removes every pick.'],
+        ['taggable', 'bool', 'false', 'Lets the user add typed values that are not in the list. Backspace in an empty search box takes a typed tag back for editing.'],
+        ['create-text', 'string', "'Add \":term\"'", 'Row text offering the typed value in taggable mode; `:term` is replaced.'],
         ['placeholder', 'string', "'Select options'", 'Trigger text when nothing is selected.'],
         ['search-placeholder', 'string', "'Search...'", 'Placeholder of the search box inside the dropdown.'],
         ['empty-text', 'string', "'No results found.'", 'Shown when the search matches nothing.'],
@@ -62,6 +65,20 @@
                 BLADE,
         ],
         [
+            'title' => 'Clearable and taggable',
+            'text' => '`clearable` adds a × to the trigger that removes every pick. `taggable` offers whatever the user typed as a new value when no option label matches it — click the Add row or press Enter. A typed tag is its own label, and Backspace in an empty search box takes the last one back into the box for editing. Validate each item on the server: tags are free input.',
+            'code' => <<<'BLADE'
+                <x-avian::multi-select
+                    name="keywords"
+                    label="Keywords"
+                    :options="$suggestedKeywords"
+                    :value="old('keywords', $post->keywords)"
+                    clearable
+                    taggable
+                />
+                BLADE,
+        ],
+        [
             'title' => 'Custom option markup',
             'text' => '`label` is the text shown on the chip and used for searching; the slot is how the row looks in the dropdown.',
             'code' => <<<'BLADE'
@@ -110,6 +127,15 @@
                 :options="['ada' => 'Ada Lovelace', 'grace' => 'Grace Hopper', 'alan' => 'Alan Turing', 'linus' => 'Linus Torvalds']"
             />
             <x-avian::multi-select
+                name="multi_keywords"
+                label="Keywords (clearable, taggable)"
+                hint="Type a keyword that is not listed and press Enter to add it."
+                clearable
+                taggable
+                :options="['laravel' => 'Laravel', 'livewire' => 'Livewire', 'alpine' => 'Alpine.js']"
+                :value="['laravel', 'ui kit']"
+            />
+            <x-avian::multi-select
                 name="multi_tags"
                 label="Tags"
                 required
@@ -131,6 +157,7 @@
         <ul class="aui-showcase-list">
             <li>Click an option to toggle it; the dropdown stays open so you can keep picking. Click outside or press Esc to close.</li>
             <li>Remove a value with the × on its chip, with Backspace in an empty search box, or with <em>Clear</em> in the dropdown.</li>
+            <li>With <code>taggable</code>, a term that matches no label shows an <em>Add "…"</em> row; Enter adds it too. Backspace in an empty search box takes a typed tag back for editing.</li>
             <li>One hidden <code>&lt;input name="skills[]"&gt;</code> is rendered per value. When nothing is picked, nothing is sent — use <code>$request-&gt;input('skills', [])</code>.</li>
             <li>Requires Alpine and the package script (<code>&lt;x-avian::scripts /&gt;</code>) loaded before Alpine.</li>
         </ul>

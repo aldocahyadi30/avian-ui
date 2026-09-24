@@ -208,7 +208,64 @@ it('hands filtering to the server when a search model is given', function () {
 
     expect($html)->toContain('wire:model.live.debounce.300ms="filter.statusSearch"')
         ->not->toContain('x-model="search"')
-        ->not->toContain('x-on:input="filter()"');
+        ->not->toContain('x-on:input="typed(search)"');
+});
+
+it('renders a clear button only for a clearable searchable select', function () {
+    $options = ['admin' => 'Administrator'];
+
+    $clearable = Blade::render('<x-avian::searchable-select name="role" :options="$options" clearable />', ['options' => $options]);
+    $plain = Blade::render('<x-avian::searchable-select name="role" :options="$options" />', ['options' => $options]);
+    $disabled = Blade::render('<x-avian::searchable-select name="role" :options="$options" clearable disabled />', ['options' => $options]);
+
+    expect($clearable)->toContain('is-clearable')
+        ->toContain('class="aui-combobox-clear"')
+        ->toContain('x-on:click.stop="clear()"')
+        ->toContain('x-on:keydown.backspace.prevent="clear()"')
+        ->and($plain)->not->toContain('aui-combobox-clear')
+        ->not->toContain('is-clearable')
+        ->and($disabled)->not->toContain('class="aui-combobox-clear"');
+});
+
+it('offers typed values as new options in a taggable searchable select', function () {
+    $html = Blade::render(
+        '<x-avian::searchable-select name="city" :options="$options" taggable create-text="Use :term" />',
+        ['options' => ['jkt' => 'Jakarta']],
+    );
+
+    expect($html)->toContain('taggable: true')
+        ->toContain('createText: \'Use :term\'')
+        ->toContain('aui-combobox-item aui-combobox-create')
+        ->toContain('x-on:click="create()"');
+
+    expect(Blade::render('<x-avian::searchable-select name="city" :options="[]" />'))
+        ->not->toContain('aui-combobox-create')
+        ->toContain('taggable: false');
+});
+
+it('labels a taggable value that is not among the options with the value itself', function () {
+    $html = Blade::render(
+        '<x-avian::searchable-select name="city" :options="$options" value="Bogor" taggable />',
+        ['options' => ['jkt' => 'Jakarta']],
+    );
+
+    expect($html)->toContain('>Bogor</span>')
+        ->toContain('value="Bogor"')
+        ->toContain('data-aui-labels="{&quot;Bogor&quot;:&quot;Bogor&quot;}"');
+
+    expect(Blade::render(
+        '<x-avian::searchable-select name="city" :options="$options" value="Bogor" placeholder="Pick" />',
+        ['options' => ['jkt' => 'Jakarta']],
+    ))->toContain('>Pick</span>');
+});
+
+it('hides the server-rendered empty state while a taggable search model can create', function () {
+    $html = Blade::render(
+        '<x-avian::searchable-select name="city" search-model="citySearch" :options="[]" taggable />',
+    );
+
+    expect($html)->toContain('x-on:input="typed($event.target.value)"')
+        ->toContain('x-show="!canCreate"');
 });
 
 it('shows the empty state for a search model list with no results', function () {
@@ -302,7 +359,41 @@ it('renders custom multi select option markup passed as children', function () {
     expect($html)->toContain('<small>ada@example.com</small>')
         ->toContain('>Grace</span>')
         ->toContain('x-on:click="toggleValue(')
-        ->toContain('aui-combobox-item active');
+        ->toContain('aui-combobox-item active')
+        ->toContain('data-value="2"');
+});
+
+it('renders a clear button only for a clearable multi select', function () {
+    $options = ['php' => 'PHP'];
+
+    $clearable = Blade::render('<x-avian::multi-select name="tags" :options="$options" clearable />', ['options' => $options]);
+    $plain = Blade::render('<x-avian::multi-select name="tags" :options="$options" />', ['options' => $options]);
+    $disabled = Blade::render('<x-avian::multi-select name="tags" :options="$options" clearable disabled />', ['options' => $options]);
+
+    expect($clearable)->toContain('is-clearable')
+        ->toContain('class="aui-combobox-clear"')
+        ->toContain('x-on:keydown.delete.prevent="clear()"')
+        ->and($plain)->not->toContain('class="aui-combobox-clear"')
+        ->not->toContain('is-clearable')
+        ->and($disabled)->not->toContain('class="aui-combobox-clear"');
+});
+
+it('offers typed values as new chips in a taggable multi select', function () {
+    $html = Blade::render(
+        '<x-avian::multi-select name="tags" :options="$options" :value="[\'php\', \'ui kit\']" taggable create-text="Use :term" />',
+        ['options' => ['php' => 'PHP']],
+    );
+
+    expect($html)->toContain('taggable: true')
+        ->toContain('createText: \'Use :term\'')
+        ->toContain('aui-combobox-item aui-combobox-create')
+        ->toContain('x-on:click="create()"')
+        ->toContain('removeLast()')
+        ->toContain('<span class="aui-multiselect-chip">ui kit</span>');
+
+    expect(Blade::render('<x-avian::multi-select name="tags" :options="[]" />'))
+        ->not->toContain('aui-combobox-create')
+        ->toContain('taggable: false');
 });
 
 it('renders a datepicker input with its flatpickr hook attributes', function () {

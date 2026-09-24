@@ -8,6 +8,9 @@
         ['empty-text', 'string', "'No results found.'", 'Shown when the search matches nothing.'],
         ['search-model', 'string|null', 'null', 'Livewire only: property that receives the search term, so the server filters `options`.'],
         ['search-debounce', 'string', "'250ms'", 'Debounce for the search-model request.'],
+        ['clearable', 'bool', 'false', 'Adds a × button (and Backspace / Delete on the trigger) that resets the value.'],
+        ['taggable', 'bool', 'false', 'Lets the user pick a typed value that is not in the list; reopening prefills the search box with the current label so it can be edited.'],
+        ['create-text', 'string', "'Add \":term\"'", 'Row text offering the typed value in taggable mode; `:term` is replaced.'],
         ['label', 'string|null', 'null', 'Label shown above the control.'],
         ['hint', 'string|null', 'null', 'Helper text under the control.'],
         ['error', 'string|null', 'null', 'Force an error message; otherwise read from $errors.'],
@@ -54,6 +57,21 @@
                         </x-avian::searchable-select.option>
                     @endforeach
                 </x-avian::searchable-select>
+                BLADE,
+        ],
+        [
+            'title' => 'Clearable and taggable',
+            'text' => '`clearable` adds a × button that empties the value. `taggable` offers whatever the user typed as a new value when no option label matches it; a tagged value is its own label. Reopening prefills the search box with the current label, selected, so it can be edited or typed over.',
+            'code' => <<<'BLADE'
+                <x-avian::searchable-select
+                    name="city"
+                    label="City"
+                    :options="$cities"
+                    :value="old('city', $address->city)"
+                    clearable
+                    taggable
+                    create-text="Use &quot;:term&quot;"
+                />
                 BLADE,
         ],
         [
@@ -128,6 +146,15 @@
                 @endforeach
             </x-avian::searchable-select>
             <x-avian::searchable-select
+                name="searchable_district"
+                label="District (clearable, taggable)"
+                value="mgl"
+                hint="Type a district that is not listed to add it."
+                clearable
+                taggable
+                :options="['mgl' => 'Menteng', 'kby' => 'Kebayoran Baru', 'tbt' => 'Tebet', 'cpt' => 'Cempaka Putih']"
+            />
+            <x-avian::searchable-select
                 name="searchable_owner"
                 label="Owner"
                 required
@@ -141,6 +168,8 @@
         <h4 class="aui-showcase-heading">How it works</h4>
         <ul class="aui-showcase-list">
             <li>Click the trigger (or focus it and press Enter) to open. Type to filter, use ↑ / ↓ to move, Enter to pick and Esc to close.</li>
+            <li>With <code>clearable</code>, the × button or Backspace / Delete on the focused trigger clears the value.</li>
+            <li>With <code>taggable</code>, a term that matches no label shows an <em>Add "…"</em> row (↓ then Enter, or click). The typed text is submitted as the value.</li>
             <li>The chosen value is written to a hidden <code>&lt;input name="…"&gt;</code>, so it submits like a normal field.</li>
             <li>The dropdown is teleported to <code>&lt;body&gt;</code>, so it is never clipped by a card, modal or scrolling table.</li>
             <li>Requires Alpine and the package script (<code>&lt;x-avian::scripts /&gt;</code>) loaded before Alpine.</li>

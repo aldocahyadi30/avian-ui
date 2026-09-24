@@ -43,6 +43,17 @@
             @endforeach
         </x-avian::searchable-select>
 
+    `clearable` adds a × button to the trigger that resets the value to an
+    empty string (Backspace / Delete on the focused trigger does the same).
+
+    `taggable` lets the user submit a value that is not in the list: when
+    the search term matches no option label, an `Add "…"` row (see
+    `create-text`) picks the typed text itself as both value and label.
+    Reopening the dropdown prefills the search box with the current label,
+    selected, so it can be edited in place — or typed over to search again.
+
+        <x-avian::searchable-select name="city" :options="$cities" taggable clearable />
+
     The dropdown itself is teleported to <body> and positioned with fixed
     coordinates computed from the trigger's bounding rect — cards use
     `overflow: hidden` for their rounded corners, which would otherwise clip
@@ -59,6 +70,9 @@
     'emptyText' => 'No results found.',
     'searchModel' => null,
     'searchDebounce' => '250ms',
+    'clearable' => false,
+    'taggable' => false,
+    'createText' => 'Add ":term"',
     'hint' => null,
     'error' => null,
     'errorBag' => null,
@@ -100,6 +114,11 @@
 
     $hasValue = $selected !== null && $selected !== '';
     $selectedLabel = $hasValue && $optionList !== null ? $optionList[$selected] ?? null : null;
+    // A tagged value is not in `options`, so it is its own label.
+    if ($selectedLabel === null && $hasValue && $taggable && $optionList !== null) {
+        $selectedLabel = (string) $selected;
+    }
+
     $seedLabels = $hasValue && $selectedLabel !== null ? [(string) $selected => (string) $selectedLabel] : [];
 @endphp
 
@@ -114,15 +133,18 @@
     <div x-data="auiSearchableSelect({
         property: @js($valueProperty),
         searchProperty: @js($searchModel),
+        taggable: @js((bool) $taggable),
+        createText: @js($createText),
     })" data-aui-value="{{ $hasValue ? (string) $selected : '' }}"
         data-aui-labels="{{ json_encode((object) $seedLabels) }}" x-ref="wrapper"
         x-on:click.window="if (open && !$refs.wrapper.contains($event.target) && !$refs.dropdown.contains($event.target)) close()"
         x-on:resize.window="if (open) reposition()" x-on:scroll.window="if (open) reposition()"
-        {{ $rootAttributes->class(['aui-combobox', 'is-disabled' => $disabled]) }}
+        {{ $rootAttributes->class(['aui-combobox', 'is-clearable' => $clearable, 'is-disabled' => $disabled]) }}
         :class="{ 'is-open': open }">
         <button type="button" id="{{ $inputId }}" x-ref="trigger"
             class="aui-select aui-combobox-trigger{{ $size ? ' aui-select-' . $size : '' }}{{ filled($inputError) ? ' aui-select-invalid' : '' }}"
-            x-on:click="toggle()" x-bind:aria-expanded="open" aria-haspopup="listbox"
+            x-on:click="toggle()" @if ($clearable) x-on:keydown.backspace.prevent="clear()" x-on:keydown.delete.prevent="clear()" @endif
+            x-bind:aria-expanded="open" aria-haspopup="listbox"
             aria-invalid="{{ filled($inputError) ? 'true' : 'false' }}" @disabled($disabled)>
             {{-- `wire:ignore`: the server-rendered text is only a first-paint
                  fallback. Once a search filters the selection out, the server
@@ -133,6 +155,13 @@
                 x-text="selectedLabel ?? @js($placeholder)">{{ $selectedLabel ?? $placeholder }}</span>
             <i class="fas fa-chevron-down aui-combobox-arrow" aria-hidden="true"></i>
         </button>
+
+        @if ($clearable && !$disabled)
+            <button type="button" class="aui-combobox-clear" x-show="selectedValue !== null" x-cloak
+                x-on:click.stop="clear()" aria-label="Clear selection">
+                <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+        @endif
 
         <input type="hidden" x-ref="input" @if ($name) name="{{ $name }}" @endif
             {{ $valueAttributes }} value="{{ $selected }}">
@@ -158,10 +187,11 @@
                     @if ($searchModel)
                         <input type="text" x-ref="search" class="aui-combobox-search-input"
                             placeholder="{{ $searchPlaceholder }}"
-                            wire:model.live.debounce.{{ $searchDebounce }}="{{ $searchModel }}">
+                            wire:model.live.debounce.{{ $searchDebounce }}="{{ $searchModel }}"
+                            @if ($taggable) x-on:input="typed($event.target.value)" @endif>
                     @else
                         <input type="text" x-ref="search" class="aui-combobox-search-input"
-                            placeholder="{{ $searchPlaceholder }}" x-model="search" x-on:input="filter()">
+                            placeholder="{{ $searchPlaceholder }}" x-model="search" x-on:input="typed(search)">
                     @endif
                 </div>
 
@@ -174,9 +204,18 @@
                         {{ $slot }}
                     @endif
 
+                    {{-- Kept after the options so Enter still picks the first
+                         match, and the new value is only a Down-arrow away. --}}
+                    @if ($taggable)
+                        <button type="button" class="aui-combobox-item aui-combobox-create" hidden
+                            :hidden="!canCreate" x-on:click="create()" role="option">
+                            <span><i class="fas fa-plus" aria-hidden="true"></i> <span x-text="createLabel"></span></span>
+                        </button>
+                    @endif
+
                     @if ($searchModel)
                         @if (!$optionList && $slot->isEmpty())
-                            <p class="aui-combobox-empty">{{ $emptyText }}</p>
+                            <p class="aui-combobox-empty" @if ($taggable) x-show="!canCreate" @endif>{{ $emptyText }}</p>
                         @endif
                     @else
                         <p class="aui-combobox-empty" x-ref="empty" @if (filled($optionList) || $slot->isNotEmpty()) hidden @endif>

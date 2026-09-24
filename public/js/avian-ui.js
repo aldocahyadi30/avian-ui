@@ -338,6 +338,10 @@
          * `filter()` becomes a no-op and the search input binds with
          * `wire:model` directly.
          *
+         * With `taggable`, a search term that matches no option label can be
+         * picked as a value of its own, and reopening prefills the search box
+         * with the current label so it can be edited.
+         *
          * The dropdown is teleported to <body> and positioned from the
          * trigger's bounding rect, so it never gets clipped by an
          * `overflow: hidden` ancestor (a card, for instance).
@@ -352,6 +356,12 @@
                 searchProperty: config.searchProperty || null,
                 labels: config.labels || {},
                 localValue: config.value || null,
+                taggable: config.taggable === true,
+                createText: config.createText || 'Add ":term"',
+
+                /* True while the search box still holds the prefilled label
+                   of a taggable select, i.e. the user has not typed yet. */
+                pristine: false,
 
                 top: 0,
                 left: 0,
@@ -386,7 +396,37 @@
                 get selectedLabel() {
                     var value = this.selectedValue;
 
-                    return value === null ? null : (this.labels[value] ?? null);
+                    if (value === null) {
+                        return null;
+                    }
+
+                    return this.labels[value] ?? (this.taggable ? value : null);
+                },
+
+                get term() {
+                    return (this.search || '').trim();
+                },
+
+                /* Offer the typed text as a new value unless it already names
+                   an option (or the current selection). */
+                get canCreate() {
+                    var term = this.term.toLowerCase();
+
+                    if (! this.taggable || this.pristine || term === '') {
+                        return false;
+                    }
+
+                    if (this.selectedLabel !== null && this.selectedLabel.toLowerCase() === term) {
+                        return false;
+                    }
+
+                    return ! this.options().some(function (item) {
+                        return (item.dataset.label || item.textContent || '').trim().toLowerCase() === term;
+                    });
+                },
+
+                get createLabel() {
+                    return this.createText.replace(':term', this.term);
                 },
 
                 remember: function (value, label) {
@@ -405,10 +445,24 @@
                     return this.$refs.list ? Array.from(this.$refs.list.querySelectorAll('.aui-combobox-item')) : [];
                 },
 
+                /* Every row but the taggable "Add …" one, whose visibility
+                   is bound to `canCreate` rather than set by `filter()`. */
+                options: function () {
+                    return this.items().filter(function (item) {
+                        return ! item.classList.contains('aui-combobox-create');
+                    });
+                },
+
                 visibleItems: function () {
                     return this.items().filter(function (item) {
                         return ! item.hidden;
                     });
+                },
+
+                typed: function (value) {
+                    this.search = value;
+                    this.pristine = false;
+                    this.filter();
                 },
 
                 filter: function () {
@@ -417,15 +471,20 @@
                     }
 
                     var term = this.search.trim().toLowerCase();
+                    var visible = 0;
 
-                    this.items().forEach(function (item) {
+                    this.options().forEach(function (item) {
                         var text = (item.dataset.label || item.textContent || '').toLowerCase();
                         item.hidden = term !== '' && text.indexOf(term) === -1;
                         item.classList.remove('is-highlighted');
+
+                        if (! item.hidden) {
+                            visible++;
+                        }
                     });
 
                     if (this.$refs.empty) {
-                        this.$refs.empty.hidden = this.visibleItems().length > 0;
+                        this.$refs.empty.hidden = visible > 0 || this.canCreate;
                     }
                 },
 
@@ -454,20 +513,77 @@
                         this.filter();
                     }
 
+                    /* Prefill after filtering so the full list still shows;
+                       the text is selected, so typing replaces it. */
+                    var prefill = this.taggable && this.selectedLabel !== null
+                        && ! (this.$refs.search && this.$refs.search.value);
+
+                    if (prefill) {
+                        this.search = this.selectedLabel;
+                        this.pristine = true;
+                    }
+
                     this.$nextTick(function () {
                         if (self.$refs.search) {
+                            if (prefill) {
+                                self.$refs.search.value = self.selectedLabel;
+                            }
+
                             self.$refs.search.focus();
+
+                            if (prefill) {
+                                self.$refs.search.select();
+                            }
                         }
                     });
                 },
 
                 close: function () {
                     this.open = false;
+
+                    /* An untouched prefill is not a search the next open
+                       should inherit. */
+                    if (this.pristine) {
+                        this.pristine = false;
+                        this.search = '';
+
+                        if (this.$refs.search) {
+                            this.$refs.search.value = '';
+                        }
+                    }
+                },
+
+                create: function () {
+                    var term = this.term;
+
+                    if (term !== '') {
+                        this.choose(term, term);
+                    }
+                },
+
+                clear: function () {
+                    if (this.selectedValue === null) {
+                        return;
+                    }
+
+                    this.localValue = null;
+                    this.write('');
+                    this.$dispatch('aui-cleared');
+                    this.$refs.trigger.focus();
+                },
+
+                /* Written through the hidden input so every wire:model
+                   modifier keeps behaving as usual. */
+                write: function (value) {
+                    this.$refs.input.value = value;
+                    this.$refs.input.dispatchEvent(new Event('input', { bubbles: true }));
+                    this.$refs.input.dispatchEvent(new Event('change', { bubbles: true }));
                 },
 
                 choose: function (value, label) {
                     this.remember(value, label);
                     this.localValue = String(value);
+                    this.pristine = false;
 
                     /* Queued deferred so it rides along with the request the
                        value change fires — the next open starts from the
@@ -478,13 +594,10 @@
                         if (this.$refs.search) {
                             this.$refs.search.value = '';
                         }
-                    } else {
-                        this.search = '';
                     }
 
-                    this.$refs.input.value = value;
-                    this.$refs.input.dispatchEvent(new Event('input', { bubbles: true }));
-                    this.$refs.input.dispatchEvent(new Event('change', { bubbles: true }));
+                    this.search = '';
+                    this.write(value);
 
                     this.close();
                     this.$refs.trigger.focus();
@@ -513,7 +626,17 @@
 
                 chooseHighlighted: function () {
                     var items = this.visibleItems();
-                    var item = (this.$refs.list && this.$refs.list.querySelector('.aui-combobox-item.is-highlighted')) || items[0];
+                    var highlighted = this.$refs.list && this.$refs.list.querySelector('.aui-combobox-item.is-highlighted');
+
+                    /* Enter on an untouched prefill keeps the current value. */
+                    if (! highlighted && this.pristine) {
+                        this.close();
+                        this.$refs.trigger.focus();
+
+                        return;
+                    }
+
+                    var item = highlighted || items[0];
 
                     if (item) {
                         item.click();
@@ -522,7 +645,11 @@
             };
         },
 
-        /** Searchable select that picks several values. */
+        /**
+         * Searchable select that picks several values. With `taggable`, a
+         * search term that matches no option label can be added as a value
+         * of its own.
+         */
         auiMultiSelect: function (config) {
             config = config || {};
 
@@ -532,6 +659,8 @@
                 values: [],
                 labels: {},
                 max: config.max || null,
+                taggable: config.taggable === true,
+                createText: config.createText || 'Add ":term"',
 
                 top: 0,
                 left: 0,
@@ -603,6 +732,61 @@
                     return Array.isArray(this.values) && this.values.indexOf(String(value)) !== -1;
                 },
 
+                get term() {
+                    return (this.search || '').trim();
+                },
+
+                /* Offer the typed text as a new value unless it already names
+                   an option or a pick, or the `max` is reached. */
+                get canCreate() {
+                    var self = this;
+                    var term = this.term.toLowerCase();
+
+                    if (! this.taggable || term === '' || (this.max && this.values.length >= this.max)) {
+                        return false;
+                    }
+
+                    var taken = this.values.some(function (item) {
+                        return item.toLowerCase() === term || String(self.labelFor(item)).toLowerCase() === term;
+                    });
+
+                    return ! taken && ! this.options().some(function (item) {
+                        return (item.dataset.label || item.textContent || '').trim().toLowerCase() === term;
+                    });
+                },
+
+                get createLabel() {
+                    return this.createText.replace(':term', this.term);
+                },
+
+                create: function () {
+                    var term = this.term;
+
+                    if (! this.canCreate) {
+                        return;
+                    }
+
+                    this.search = '';
+                    this.toggleValue(term, term);
+                    this.filter();
+                },
+
+                /* A typed tag (no option row carries its value) goes back
+                   into the search box so it can be edited and re-added. */
+                removeLast: function () {
+                    var value = this.values[this.values.length - 1];
+                    var isTag = this.taggable && ! this.options().some(function (item) {
+                        return item.dataset.value === value;
+                    });
+
+                    this.remove(value);
+
+                    if (isTag) {
+                        this.search = this.labelFor(value);
+                        this.filter();
+                    }
+                },
+
                 toggleValue: function (value, label) {
                     value = String(value);
                     this.remember(value, label);
@@ -653,6 +837,14 @@
                     return this.$refs.list ? Array.from(this.$refs.list.querySelectorAll('.aui-combobox-item')) : [];
                 },
 
+                /* Every row but the taggable "Add …" one, whose visibility
+                   is bound to `canCreate` rather than set by `filter()`. */
+                options: function () {
+                    return this.items().filter(function (item) {
+                        return ! item.classList.contains('aui-combobox-create');
+                    });
+                },
+
                 visibleItems: function () {
                     return this.items().filter(function (item) {
                         return ! item.hidden;
@@ -661,15 +853,20 @@
 
                 filter: function () {
                     var term = this.search.trim().toLowerCase();
+                    var visible = 0;
 
-                    this.items().forEach(function (item) {
+                    this.options().forEach(function (item) {
                         var text = (item.dataset.label || item.textContent || '').toLowerCase();
                         item.hidden = term !== '' && text.indexOf(term) === -1;
                         item.classList.remove('is-highlighted');
+
+                        if (! item.hidden) {
+                            visible++;
+                        }
                     });
 
                     if (this.$refs.empty) {
-                        this.$refs.empty.hidden = this.visibleItems().length > 0;
+                        this.$refs.empty.hidden = visible > 0 || this.canCreate;
                     }
                 },
 
@@ -736,11 +933,14 @@
                     items[next].scrollIntoView({ block: 'nearest' });
                 },
 
+                /* With nothing highlighted, Enter adds the typed tag. */
                 chooseHighlighted: function () {
                     var item = this.$refs.list && this.$refs.list.querySelector('.aui-combobox-item.is-highlighted');
 
                     if (item) {
                         item.click();
+                    } else if (this.canCreate) {
+                        this.create();
                     }
                 },
             };
