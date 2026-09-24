@@ -19,6 +19,7 @@ it('renders every component together on the workbench showcase', function () {
         ->toContain('auiTabs(')
         ->toContain('auiDropdown({')
         ->toContain('auiMultiSelect(')
+        ->toContain('auiDatalist(')
         ->toContain('auiSearchableSelect(')
         ->toContain('auiFile(')
         ->toContain('flatpickr-input')

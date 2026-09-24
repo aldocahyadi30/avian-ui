@@ -353,7 +353,8 @@ input `readonly` by default, so it renders with the same dimmed styling as a
 
 Available components: `alert`, `avatar`, `badge`, `button`, `card`,
 `dropdown` (+ `dropdown.item`), `empty`, `page-header`, `pagination`,
-`progress`, `scripts`, `spinner`, `styles`, `table`, `tabs` (+ `tabs.panel`),
+`progress`, `scripts`, `spinner`, `styles`, `table`, `datalist`
+(+ `datalist.item`), `tabs` (+ `tabs.panel`),
 `modal`, plus the form set `form`, `field`, `label`, `error`, `hint`, `input`,
 `textarea`, `select`, `searchable-select` (+ `searchable-select.option`),
 `checkbox`, `radio`, `switch`, `file`, `datepicker`.
@@ -409,6 +410,49 @@ When the table has no rows it renders an empty state spanning every column
 
 The colspan comes from `headers`; when you build the header with a `head`
 slot instead, pass `:columns="3"` so the empty row spans the whole table.
+
+For records that read better as cards than as rows (products, files, people),
+use `<x-avian::datalist>`. It takes the same `paginator` and empty-state props
+(`empty`, `empty-text`, `empty-icon`, an `empty` slot) as the table, and shows
+its items either as a list or as a grid of cards, with a toggle between the two:
+
+```blade
+<x-avian::datalist :paginator="$products" view="grid" :columns="3" persist="products">
+    <x-slot:toolbar>
+        <span>{{ $products->total() }} products</span>
+    </x-slot:toolbar>
+
+    @foreach ($products as $product)
+        <x-avian::datalist.item
+            :title="$product->name"
+            :subtitle="$product->sku"
+            :image="$product->image_url"
+            :href="route('products.show', $product)"
+        >
+            {{ $product->summary }}
+
+            <x-slot:meta>
+                <x-avian::badge variant="success" dot>In stock</x-avian::badge>
+            </x-slot:meta>
+
+            <x-slot:actions>
+                <x-avian::button icon="fas fa-pen" icon-only label="Edit" size="sm" variant="light" />
+            </x-slot:actions>
+        </x-avian::datalist.item>
+    @endforeach
+</x-avian::datalist>
+```
+
+- `view` is the initial layout (`list` or `grid`), `:columns` the cards per row
+  in grid view (1–4, fewer on small screens).
+- `persist="products"` remembers the viewer's choice in localStorage;
+  `:toggle="false"` hides the switch for a fixed layout.
+- With Livewire, `wire:model="view"` binds the layout to a property.
+  Every change also dispatches an `aui-view-changed` browser event.
+- Each item takes `title`, `subtitle`, `image` or `icon`, and `href` (the whole
+  item becomes clickable, while `actions` stay separately clickable), plus
+  `media`, `meta` and `actions` slots. The same item renders as a row in list
+  view and as a card in grid view.
 
 ### 5. Modals, dropdowns and tabs
 

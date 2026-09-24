@@ -36,7 +36,7 @@ building. Never add a CDN tag for the package assets.
 
 **Components.** Use the anonymous components rather than hand-written markup:
 
-- general: `button`, `card`, `badge`, `alert`, `table`, `pagination`, `page-header`, `empty`, `avatar`, `progress`, `spinner`, `modal`, `dropdown` (+ `dropdown.item`), `tabs` (+ `tabs.panel`)
+- general: `button`, `card`, `badge`, `alert`, `table`, `datalist` (+ `datalist.item`), `pagination`, `page-header`, `empty`, `avatar`, `progress`, `spinner`, `modal`, `dropdown` (+ `dropdown.item`), `tabs` (+ `tabs.panel`)
 - form: `form`, `field`, `label`, `error`, `hint`, `input`, `textarea`, `select`, `searchable-select` (+ `searchable-select.option`), `multi-select` (+ `multi-select.option`), `checkbox`, `radio`, `switch`, `file`, `datepicker`
 
 Form controls render their own label, hint and validation message from `name`,
@@ -108,6 +108,26 @@ Works with both `paginate()` (numbered links plus a result count) and
 With no rows, `table` renders an empty state across every column. Set
 `empty`, `empty-text`, `empty-icon`, pass an `empty` slot, or disable it with
 `:empty="false"`; pass `:columns` when the header comes from a `head` slot.
+
+**Paginated lists and grids.** For records that read better as cards
+(products, files, people), use `datalist`: same `paginator` and empty-state
+props as `table`, plus a list/grid toggle. `view` sets the initial layout,
+`:columns` the cards per row (1–4), `persist="key"` remembers the choice in
+localStorage, `:toggle="false"` hides the switch and `wire:model` binds the
+layout to a Livewire property:
+
+```blade
+<x-avian::datalist :paginator="$products" view="grid" :columns="3" persist="products">
+    @foreach ($products as $product)
+        <x-avian::datalist.item :title="$product->name" :subtitle="$product->sku"
+            :image="$product->image_url" :href="route('products.show', $product)">
+            {{ $product->summary }}
+            <x-slot:meta>{{ $product->price }}</x-slot:meta>
+            <x-slot:actions>...</x-slot:actions>
+        </x-avian::datalist.item>
+    @endforeach
+</x-avian::datalist>
+```
 
 **Interactive components.** Open a named modal with the button's `modal` prop
 (`<x-avian::button modal="edit">`), from Livewire

@@ -31,6 +31,7 @@
         ],
         'Data & navigation' => [
             'components.table' => ['label' => 'Table', 'icon' => 'fas fa-table'],
+            'components.datalist' => ['label' => 'Datalist', 'icon' => 'fas fa-grip'],
             'components.pagination' => ['label' => 'Pagination', 'icon' => 'fas fa-ellipsis'],
             'components.tabs' => ['label' => 'Tabs', 'icon' => 'fas fa-folder'],
             'components.dropdown' => ['label' => 'Dropdown', 'icon' => 'fas fa-caret-down'],

@@ -262,6 +262,57 @@
             };
         },
 
+        /**
+         * Data list: switches its items between a list and a grid layout.
+         *
+         * `persist` names a localStorage key that remembers the viewer's
+         * choice across page loads. Storage can be unavailable (private mode,
+         * blocked site data), so every access is guarded and the server-side
+         * `view` simply stays in place when it fails.
+         */
+        auiDatalist: function (config) {
+            config = config || {};
+
+            return {
+                view: config.view === 'grid' ? 'grid' : 'list',
+                persist: config.persist || null,
+
+                init: function () {
+                    if (! this.persist) {
+                        return;
+                    }
+
+                    try {
+                        var stored = window.localStorage.getItem('aui-datalist:' + this.persist);
+
+                        if (stored === 'list' || stored === 'grid') {
+                            this.view = stored;
+                        }
+                    } catch (error) {
+                        /* Storage unavailable: keep the server-rendered view. */
+                    }
+                },
+
+                set: function (view) {
+                    if (view !== 'list' && view !== 'grid') {
+                        return;
+                    }
+
+                    this.view = view;
+
+                    if (this.persist) {
+                        try {
+                            window.localStorage.setItem('aui-datalist:' + this.persist, view);
+                        } catch (error) {
+                            /* Storage unavailable: the choice lasts for this page only. */
+                        }
+                    }
+
+                    this.$dispatch('aui-view-changed', { view: view });
+                },
+            };
+        },
+
         /** Dismissible element (alerts, banners). */
         auiDismiss: function (config) {
             config = config || {};
