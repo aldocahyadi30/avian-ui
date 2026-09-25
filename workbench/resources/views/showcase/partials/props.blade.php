@@ -5,7 +5,7 @@
     <div class="aui-showcase-props">
         <x-avian::table :headers="['Prop', 'Type', 'Default', 'Description']" :hover="false">
             @foreach ($props as [$prop, $type, $default, $description])
-                <tr>
+                <tr data-search-prop="{{ $prop }}">
                     <td><code>{{ $prop }}</code></td>
                     <td><code class="aui-showcase-type">{{ $type }}</code></td>
                     <td><code class="aui-showcase-type">{{ $default }}</code></td>
