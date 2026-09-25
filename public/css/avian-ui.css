@@ -520,6 +520,8 @@
 .aui-btn-icon {
     width: var(--aui-control-height);
     padding: 0;
+    /* Stay square inside flex rows (card actions, toolbars) instead of shrinking next to a wide input */
+    flex-shrink: 0;
 }
 
 .aui-btn-icon.aui-btn-sm {
