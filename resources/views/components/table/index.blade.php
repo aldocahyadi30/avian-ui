@@ -8,6 +8,11 @@
     'emptyText' => null,
     'emptyIcon' => 'fas fa-inbox',
     'columns' => null,
+    'sortBy' => null,
+    'sortDirection' => null,
+    'sortParam' => 'sort',
+    'directionParam' => 'direction',
+    'livewire' => null,
 ])
 
 @php
@@ -29,7 +34,14 @@
                 @else
                     <tr>
                         @foreach ($headers as $header)
-                            <th>{{ $header }}</th>
+                            @if (is_array($header))
+                                <x-avian-ui::table.heading
+                                    :sort="$header['sort'] ?? null"
+                                    :align="$header['align'] ?? null"
+                                >{{ $header['label'] ?? '' }}</x-avian-ui::table.heading>
+                            @else
+                                <th>{{ $header }}</th>
+                            @endif
                         @endforeach
                     </tr>
                 @endisset
@@ -63,5 +75,5 @@
 </div>
 
 @if ($paginator !== null)
-    <x-avian-ui::pagination :paginator="$paginator" />
+    <x-avian-ui::pagination :paginator="$paginator" :livewire="$livewire" />
 @endif

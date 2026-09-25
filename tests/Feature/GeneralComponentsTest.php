@@ -173,6 +173,81 @@ it('skips the empty state on a table when it is disabled or has rows', function 
         ->and($filled)->not->toContain('aui-table-empty');
 });
 
+it('renders sortable headers as links that sort ascending by default', function () {
+    $this->app->instance('request', Request::create('/users?page=3&search=ada'));
+
+    $html = Blade::render('<x-avian::table :headers="[[\'label\' => \'Name\', \'sort\' => \'name\'], \'Role\']" />');
+
+    expect($html)->toContain('aria-sort="none" class="aui-table-sortable"')
+        ->toContain('class="aui-table-sort" href="http://localhost/users?search=ada&amp;sort=name&amp;direction=asc"')
+        ->toContain('fas fa-sort"')
+        ->toContain('<th>Role</th>');
+});
+
+it('marks the sorted column and flips its direction from the query string', function () {
+    $this->app->instance('request', Request::create('/users?sort=name&direction=asc'));
+
+    $html = Blade::render('<x-avian::table :headers="[[\'label\' => \'Name\', \'sort\' => \'name\'], [\'label\' => \'Email\', \'sort\' => \'email\']]" />');
+
+    expect($html)->toContain('aria-sort="ascending" class="aui-table-sortable aui-table-sorted"')
+        ->toContain('href="http://localhost/users?sort=name&amp;direction=desc"')
+        ->toContain('fas fa-sort-up')
+        ->toContain('href="http://localhost/users?sort=email&amp;direction=asc"');
+});
+
+it('reads the current sort from the table props over the query string', function () {
+    $this->app->instance('request', Request::create('/users?sort=name&direction=asc'));
+
+    $html = Blade::render('<x-avian::table sort-by="email" sort-direction="desc" :headers="[[\'label\' => \'Name\', \'sort\' => \'name\'], [\'label\' => \'Email\', \'sort\' => \'email\', \'align\' => \'right\']]" />');
+
+    expect($html)->toContain('aria-sort="descending" class="aui-table-align-right aui-table-sortable aui-table-sorted"')
+        ->toContain('fas fa-sort-down')
+        ->toContain('href="http://localhost/users?sort=email&amp;direction=asc"');
+});
+
+it('drops the paginator page name from sort links', function () {
+    $this->app->instance('request', Request::create('/users?members=4'));
+
+    $paginator = new LengthAwarePaginator(
+        items: ['Ada'],
+        total: 20,
+        perPage: 1,
+        currentPage: 4,
+        options: ['path' => '/users', 'pageName' => 'members'],
+    );
+
+    $html = Blade::render(
+        '<x-avian::table :headers="[[\'label\' => \'Name\', \'sort\' => \'name\']]" :paginator="$paginator"><tr><td>Ada</td></tr></x-avian::table>',
+        ['paginator' => $paginator],
+    );
+
+    expect($html)->toContain('href="http://localhost/users?sort=name&amp;direction=asc"');
+});
+
+it('renders table headings in a head slot that follow the table sort', function () {
+    $html = Blade::render(<<<'BLADE'
+        <x-avian::table sort-by="name" sort-direction="desc" sort-param="order" direction-param="dir" :columns="2">
+            <x-slot:head>
+                <tr>
+                    <x-avian::table.heading sort="name">Name</x-avian::table.heading>
+                    <x-avian::table.heading align="right">Total</x-avian::table.heading>
+                </tr>
+            </x-slot:head>
+        </x-avian::table>
+    BLADE);
+
+    expect($html)->toContain('aria-sort="descending"')
+        ->toContain('?order=name&amp;dir=asc"')
+        ->toContain('<th class="aui-table-align-right">');
+});
+
+it('renders sortable headers as livewire sortBy buttons', function () {
+    $html = Blade::render('<x-avian::table :livewire="true" :headers="[[\'label\' => \'Name\', \'sort\' => \'name\']]" />');
+
+    expect($html)->toContain('<button type="button" class="aui-table-sort" wire:click="sortBy(\'name\')">')
+        ->not->toContain('href=');
+});
+
 it('renders pagination links for a length-aware paginator', function () {
     $paginator = new LengthAwarePaginator(
         items: ['Ada', 'Grace'],

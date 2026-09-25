@@ -583,6 +583,56 @@ When the table has no rows it renders an empty state spanning every column
 The colspan comes from `headers`; when you build the header with a `head`
 slot instead, pass `:columns="3"` so the empty row spans the whole table.
 
+To make a column sortable, pass its header as an array with a `sort` key (and
+optionally `align` => `'right'` or `'center'`). The heading becomes a link that
+sets `?sort=<key>&direction=asc`, flips to `desc` when clicked again, keeps the
+rest of the query string and drops the page parameter. The table reads the
+current sort from the query string; you apply it to the query yourself, and
+should check the key against an allowlist:
+
+```blade
+{{-- Controller:
+    $sort = in_array($request->query('sort'), ['name', 'created_at'], true) ? $request->query('sort') : 'name';
+    $direction = $request->query('direction') === 'desc' ? 'desc' : 'asc';
+    $users = User::orderBy($sort, $direction)->paginate(15)->withQueryString();
+--}}
+
+<x-avian::table
+    :headers="[
+        ['label' => 'Name', 'sort' => 'name'],
+        ['label' => 'Joined', 'sort' => 'created_at', 'align' => 'right'],
+        '',
+    ]"
+    :paginator="$users"
+>
+    ...
+</x-avian::table>
+```
+
+Pass `sort-by` and `sort-direction` to show a sort that isn't in the query
+string (a default sort, say), and `sort-param` / `direction-param` to rename
+the query parameters. In a `head` slot, use `<x-avian::table.heading
+sort="name">Name</x-avian::table.heading>`; it picks up the table's sort props.
+
+Inside a Livewire component, sortable headings render as buttons that call
+`sortBy('<key>')`. Define that method and pass the current state to the table:
+
+```php
+public string $sort = 'name';
+public string $direction = 'asc';
+
+public function sortBy(string $column): void
+{
+    $this->direction = $this->sort === $column && $this->direction === 'asc' ? 'desc' : 'asc';
+    $this->sort = $column;
+    $this->resetPage();
+}
+```
+
+```blade
+<x-avian::table :headers="$headers" :sort-by="$sort" :sort-direction="$direction" :paginator="$users">
+```
+
 For records that read better as cards than as rows (products, files, people),
 use `<x-avian::datalist>`. It takes the same `paginator` and empty-state props
 (`empty`, `empty-text`, `empty-icon`, an `empty` slot) as the table, and shows
