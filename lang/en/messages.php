@@ -12,5 +12,6 @@ return [
     'grid_view' => 'Grid view',
     'list_view' => 'List view',
     'no_results' => 'No data found',
+    'toggle' => 'Toggle content',
     'view' => 'View',
 ];

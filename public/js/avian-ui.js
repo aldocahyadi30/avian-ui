@@ -393,6 +393,71 @@
             };
         },
 
+        /** Collapsible card: folds <x-avian::card collapsible> into its header. */
+        auiCard: function (config) {
+            config = config || {};
+
+            return {
+                collapsed: config.collapsed === true,
+                persist: config.persist || null,
+
+                init: function () {
+                    if (! this.persist) {
+                        return;
+                    }
+
+                    try {
+                        var stored = window.localStorage.getItem('aui-card:' + this.persist);
+
+                        if (stored === 'collapsed' || stored === 'expanded') {
+                            this.collapsed = stored === 'collapsed';
+                        }
+                    } catch (error) {
+                        /* Storage unavailable: keep the server-rendered state. */
+                    }
+                },
+
+                toggle: function () {
+                    this.collapsed ? this.expand() : this.collapse();
+                },
+
+                expand: function () {
+                    this.set(false);
+                },
+
+                collapse: function () {
+                    this.set(true);
+                },
+
+                set: function (collapsed) {
+                    if (this.collapsed === collapsed) {
+                        return;
+                    }
+
+                    this.collapsed = collapsed;
+
+                    if (this.persist) {
+                        try {
+                            window.localStorage.setItem('aui-card:' + this.persist, collapsed ? 'collapsed' : 'expanded');
+                        } catch (error) {
+                            /* Storage unavailable: the choice lasts for this page only. */
+                        }
+                    }
+
+                    this.$dispatch('aui-card-toggled', { collapsed: collapsed });
+                },
+
+                /** Header clicks toggle too, unless they land on a control inside it. */
+                headerClick: function (event) {
+                    if (event.target.closest('a, button, input, select, textarea, label, [role="button"], .aui-card-actions')) {
+                        return;
+                    }
+
+                    this.toggle();
+                },
+            };
+        },
+
         /** Dropdown menu. */
         auiDropdown: function (config) {
             config = config || {};

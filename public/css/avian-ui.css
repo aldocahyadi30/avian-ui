@@ -204,8 +204,58 @@
     border-top: 1px solid var(--aui-border-soft);
 }
 
-.aui-card-flush > .aui-card-body {
+.aui-card-flush > .aui-card-body,
+.aui-card-flush > .aui-card-content > .aui-card-body {
     padding: 0;
+}
+
+/* Don't stretch to a grid/flex row's height, or a collapsed card keeps its size. */
+.aui-card-collapsible {
+    align-self: start;
+}
+
+.aui-card-collapsible > .aui-card-header {
+    cursor: pointer;
+    user-select: none;
+}
+
+.aui-card-collapsible.is-collapsed > .aui-card-header {
+    border-bottom: 0;
+}
+
+.aui-card-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--aui-radius-sm);
+    background: none;
+    color: var(--aui-slate-400);
+    cursor: pointer;
+    transition: background var(--aui-transition-fast), color var(--aui-transition-fast);
+}
+
+.aui-card-toggle:hover {
+    background: var(--aui-slate-100);
+    color: var(--aui-slate-700);
+}
+
+.aui-card-toggle:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--aui-ring);
+}
+
+.aui-card-toggle-icon {
+    font-size: 12px;
+    transform: rotate(180deg);
+    transition: transform var(--aui-transition-fast);
+}
+
+.aui-card-collapsible.is-collapsed .aui-card-toggle-icon {
+    transform: none;
 }
 
 /* ==========================================================================
@@ -470,6 +520,8 @@
 .aui-btn-icon {
     width: var(--aui-control-height);
     padding: 0;
+    /* Stay square inside flex rows (card actions, toolbars) instead of shrinking next to a wide input */
+    flex-shrink: 0;
 }
 
 .aui-btn-icon.aui-btn-sm {
