@@ -59,10 +59,29 @@ for a × reset button, and `taggable` to accept free-typed values that are not
 in `options` (the value is its own label; validate it on the server since it is
 arbitrary input).
 
+With `search-model` (or any limited query), the trigger label is resolved from
+`options`. When the current value has a default or saved selection the query
+doesn't return, the placeholder shows instead. Labels are cached client-side,
+so the option only has to appear once: in the computed options, prepend it while
+the search term is blank, and merge with `+`, never `array_merge()`, which
+renumbers integer keys:
+
+```php
+if ($this->customerId && blank($this->customerSearch) && ! array_key_exists($this->customerId, $options)) {
+    $options = [$this->customerId => Customer::find($this->customerId)?->name] + $options;
+}
+```
+
+In slot mode, skip that value in the `@foreach` so it isn't rendered twice:
+option `wire:key`s are derived from the value.
+
 Use `multi-select` when several values can be picked. It submits `name[]` (an
 array: validate `tags` and `tags.*`), shows picks as removable chips, accepts
 `max`, `clearable` and `taggable` (free-typed tags; validate `tags.*`), and
-binds the whole array with `wire:model` through `x-modelable`.
+binds the whole array with `wire:model` through `x-modelable`. Chip labels come
+from `options`, and a pick missing from them shows its raw value. When `options`
+comes from a limited query, merge the missing picks in, again with `+`:
+`User::whereKey(array_diff($this->userIds, array_keys($options)))->pluck('name', 'id')->all() + $options`.
 
 Pass `numeric` to `input` for a money-masked amount field
 (`<x-avian::input name="budget" numeric />`) — it renders as a text field

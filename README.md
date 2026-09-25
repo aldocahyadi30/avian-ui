@@ -281,6 +281,56 @@ it already owns the selected value through `wire:model` + `:value`:
 />
 ```
 
+The trigger label comes from `options`. So when a value is already selected
+(a default set in `mount()`, or a saved record being edited) but your query
+doesn't return it — it's past the `limit()`, or a search filtered it out — the
+trigger falls back to the placeholder. The component caches labels on the
+client, though, so it only needs to see the selected option **once**. Put it
+at the front of the list while the search term is empty:
+
+```php
+public ?int $customerId = null;
+public string $customerSearch = '';
+
+public function mount(): void
+{
+    $this->customerId ??= auth()->user()->default_customer_id;
+}
+
+#[Computed]
+public function customerOptions(): array
+{
+    $options = Customer::query()
+        ->when($this->customerSearch, fn ($query, $term) => $query->where('name', 'like', "%{$term}%"))
+        ->orderBy('name')
+        ->limit(20)
+        ->pluck('name', 'id')
+        ->all();
+
+    if ($this->customerId && blank($this->customerSearch) && ! array_key_exists($this->customerId, $options)) {
+        $options = [$this->customerId => Customer::find($this->customerId)?->name] + $options;
+    }
+
+    return $options;
+}
+```
+
+```blade
+<x-avian::searchable-select
+    wire:model.live="customerId"
+    :value="$customerId"
+    :options="$this->customerOptions"
+    search-model="customerSearch"
+/>
+```
+
+Merge with `+`, not `array_merge()`: `array_merge()` renumbers integer keys,
+which breaks the ID-to-label mapping. The `blank()` check keeps search results
+honest, since the pinned row goes away once the user types. The label stays
+because it is already cached. If you build the rows yourself as
+`searchable-select.option` children, don't render the same value twice: each
+row's `wire:key` is derived from its value.
+
 Add `clearable` for a × button that resets the value, and `taggable` to let
 users submit a value that is not in the list — when the search term matches no
 option label, an `Add "…"` row (`create-text`, with `:term` replaced) picks the
@@ -326,6 +376,29 @@ markup:
         </x-avian::multi-select.option>
     @endforeach
 </x-avian::multi-select>
+```
+
+Chip labels come from `options` too, and a pick missing from them shows as its
+raw value (`42` instead of `Jane Doe`). If `options` comes from a limited query,
+merge the current picks in so each one gets its label on the first render.
+`multi-select` filters client-side, so the extra rows can stay in the list:
+
+```php
+#[Computed]
+public function userOptions(): array
+{
+    $options = User::query()->orderBy('name')->limit(50)->pluck('name', 'id')->all();
+
+    $missing = array_diff($this->userIds, array_keys($options));
+
+    return $missing === []
+        ? $options
+        : User::whereKey($missing)->pluck('name', 'id')->all() + $options;
+}
+```
+
+```blade
+<x-avian::multi-select wire:model.live="userIds" :value="$userIds" :options="$this->userOptions" />
 ```
 
 All extra attributes land on the control itself, so `wire:model`, `x-on:*`,

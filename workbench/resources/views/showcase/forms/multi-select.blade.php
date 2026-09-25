@@ -101,6 +101,64 @@
                 public array $tags = [];
                 BLADE,
         ],
+        [
+            'title' => 'Picks outside a limited option list',
+            'text' => 'Chip labels come from `options`, so a pick that is missing from them shows its raw value (42 instead of Jane Doe). When the options come from a limited query, merge the current picks in. Filtering happens in the browser, so the extra rows can stay in the list. Merge with `+`, not array_merge(), which renumbers integer ids.',
+            'code' => <<<'BLADE'
+                {{-- Blade --}}
+                <x-avian::multi-select wire:model.live="userIds" :value="$userIds" :options="$this->userOptions" label="Members" />
+
+                // Livewire component
+                public array $userIds = [];
+
+                #[Computed]
+                public function userOptions(): array
+                {
+                    $options = User::query()->orderBy('name')->limit(50)->pluck('name', 'id')->all();
+
+                    $missing = array_diff($this->userIds, array_keys($options));
+
+                    return $missing === []
+                        ? $options
+                        : User::whereKey($missing)->pluck('name', 'id')->all() + $options;
+                }
+                BLADE,
+        ],
+        [
+            'title' => 'Picks outside the list in slot mode (custom rows)',
+            'text' => 'With custom row markup, render the current picks first, then the query results without them. Each row\'s wire:key is derived from its value, so no value may appear twice. Without `options`, the server cannot name the picks, so on a full page load the first-paint chips show raw values until Alpine starts and the rows register their labels.',
+            'code' => <<<'BLADE'
+                {{-- Blade --}}
+                <x-avian::multi-select wire:model.live="userIds" :value="$userIds" label="Members">
+                    @foreach ($this->selectedUsers as $user)
+                        <x-avian::multi-select.option :value="$user->id" :label="$user->name" :selected="$userIds">
+                            <strong>{{ $user->name }}</strong> <small>{{ $user->email }}</small>
+                        </x-avian::multi-select.option>
+                    @endforeach
+
+                    @foreach ($this->users->whereNotIn('id', $userIds) as $user)
+                        <x-avian::multi-select.option :value="$user->id" :label="$user->name" :selected="$userIds">
+                            <strong>{{ $user->name }}</strong> <small>{{ $user->email }}</small>
+                        </x-avian::multi-select.option>
+                    @endforeach
+                </x-avian::multi-select>
+
+                // Livewire component
+                public array $userIds = [];
+
+                #[Computed]
+                public function selectedUsers(): Collection
+                {
+                    return User::whereKey($this->userIds)->orderBy('name')->get();
+                }
+
+                #[Computed]
+                public function users(): Collection
+                {
+                    return User::query()->orderBy('name')->limit(50)->get();
+                }
+                BLADE,
+        ],
     ];
 @endphp
 

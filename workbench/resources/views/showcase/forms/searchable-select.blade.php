@@ -113,6 +113,97 @@
                 }
                 BLADE,
         ],
+        [
+            'title' => 'Default selection with server-side search',
+            'text' => 'The trigger label comes from `options`, so a default (or saved) value that your query does not return, because it is past the limit or not the first match, shows the placeholder. Labels are cached in the browser, so the option only needs to appear once: add it to the front while the search term is blank. Merge with `+`, not array_merge(), which renumbers integer ids. When the user types, the pinned row goes away but the trigger keeps its label.',
+            'code' => <<<'BLADE'
+                {{-- Blade --}}
+                <x-avian::searchable-select
+                    wire:model.live="customerId"
+                    :value="$customerId"
+                    :options="$this->customerOptions"
+                    search-model="customerSearch"
+                    label="Customer"
+                />
+
+                // Livewire component
+                public ?int $customerId = null;
+                public string $customerSearch = '';
+
+                public function mount(): void
+                {
+                    $this->customerId ??= auth()->user()->default_customer_id;
+                }
+
+                #[Computed]
+                public function customerOptions(): array
+                {
+                    $options = Customer::query()
+                        ->when($this->customerSearch, fn ($query, $term) => $query->where('name', 'like', "%{$term}%"))
+                        ->orderBy('name')
+                        ->limit(20)
+                        ->pluck('name', 'id')
+                        ->all();
+
+                    if ($this->customerId && blank($this->customerSearch) && ! array_key_exists($this->customerId, $options)) {
+                        $options = [$this->customerId => Customer::find($this->customerId)?->name] + $options;
+                    }
+
+                    return $options;
+                }
+                BLADE,
+        ],
+        [
+            'title' => 'Default selection in slot mode (custom rows)',
+            'text' => 'For custom row markup, or when you would rather not mix the default into the query results, render the selected row yourself ahead of the loop and skip it inside the loop. Each row\'s wire:key is derived from its value, so rendering the same value twice confuses Livewire. Without `options`, the server cannot name the selection, so on a full page load the trigger shows the placeholder until Alpine starts and the rows register their labels. If you want the label in the server-rendered HTML, use the `options` version above.',
+            'code' => <<<'BLADE'
+                {{-- Blade --}}
+                <x-avian::searchable-select
+                    wire:model.live="customerId"
+                    :value="$customerId"
+                    search-model="customerSearch"
+                    label="Customer"
+                >
+                    @if ($this->selectedCustomer && blank($customerSearch))
+                        <x-avian::searchable-select.option :value="$customerId" :label="$this->selectedCustomer->name" :selected="$customerId">
+                            <strong>{{ $this->selectedCustomer->code }}</strong> <small>{{ $this->selectedCustomer->name }}</small>
+                        </x-avian::searchable-select.option>
+                    @endif
+
+                    @foreach ($this->customers as $customer)
+                        @continue($customer->id == $customerId && blank($customerSearch))
+                        <x-avian::searchable-select.option :value="$customer->id" :label="$customer->name" :selected="$customerId">
+                            <strong>{{ $customer->code }}</strong> <small>{{ $customer->name }}</small>
+                        </x-avian::searchable-select.option>
+                    @endforeach
+                </x-avian::searchable-select>
+
+                // Livewire component
+                public ?int $customerId = null;
+                public string $customerSearch = '';
+
+                public function mount(): void
+                {
+                    $this->customerId ??= auth()->user()->default_customer_id;
+                }
+
+                #[Computed]
+                public function selectedCustomer(): ?Customer
+                {
+                    return $this->customerId ? Customer::find($this->customerId) : null;
+                }
+
+                #[Computed]
+                public function customers(): Collection
+                {
+                    return Customer::query()
+                        ->when($this->customerSearch, fn ($query, $term) => $query->where('name', 'like', "%{$term}%"))
+                        ->orderBy('name')
+                        ->limit(20)
+                        ->get();
+                }
+                BLADE,
+        ],
     ];
 @endphp
 

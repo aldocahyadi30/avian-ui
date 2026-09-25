@@ -32,6 +32,9 @@
     client-side from a small `value => label` cache: seeded with the current
     selection on first render, topped up by every option the dropdown renders
     (see searchable-select/option.blade.php) and by whatever the user picks.
+    So a default or saved selection the query doesn't return only has to be
+    prepended to `options` while the search term is blank (merge with `+`, not
+    `array_merge()`) — see the README.
 
     Custom option markup: drop `options` and pass children instead —
 

@@ -179,6 +179,15 @@
     flex-shrink: 0;
 }
 
+.aui-card-actions > .aui-field {
+    margin-bottom: 0;
+}
+
+.aui-card-actions > .aui-input,
+.aui-card-actions > .aui-select {
+    width: auto;
+}
+
 .aui-card-body {
     padding: 22px;
     font-size: var(--aui-font-size);
@@ -218,6 +227,7 @@
     line-height: 1;
     text-decoration: none;
     white-space: nowrap;
+    flex-shrink: 0;
     cursor: pointer;
     transition: background var(--aui-transition), border-color var(--aui-transition),
         color var(--aui-transition), box-shadow var(--aui-transition), transform var(--aui-transition-fast);

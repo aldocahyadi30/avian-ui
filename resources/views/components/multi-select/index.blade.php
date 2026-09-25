@@ -21,6 +21,10 @@
 
         <x-avian::multi-select wire:model.live="tags" :options="$tagOptions" />
 
+    Chip labels come from `options`; a pick missing from them shows its raw
+    value. When `options` is a limited query, merge the current picks in
+    (with `+`, not `array_merge()`) — see the README.
+
     Custom option markup: drop `options` and pass children instead —
 
         <x-avian::multi-select name="users" :value="$userIds">
