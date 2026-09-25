@@ -491,6 +491,20 @@ Available components: `accordion` (+ `accordion.item`), `alert`, `avatar`,
 `multi-select` (+ `multi-select.option`), `checkbox`, `radio`, `switch`,
 `file`, `datepicker`.
 
+Pass `collapsible` to let the viewer fold a card into its header. A chevron
+appears in the header, and clicking the header outside its actions toggles it
+too. `collapsed` starts it folded, and `persist` remembers the viewer's choice
+in localStorage under that key:
+
+```blade
+<x-avian::card title="Advanced settings" collapsible collapsed persist="advanced-settings">
+    ...
+</x-avian::card>
+```
+
+The card dispatches `aui-card-toggled` with `{ collapsed }` whenever it opens
+or closes.
+
 Breadcrumbs go right above the page header. Pass `label => url` pairs (the last
 one is the current page) or a list of `['label', 'href', 'icon']` arrays:
 

@@ -105,6 +105,49 @@ it('renders a card without a header when nothing fills it', function () {
         ->not->toContain('aui-card-header');
 });
 
+it('renders a collapsible card with a toggle and a collapsible content area', function () {
+    $html = Blade::render(<<<'BLADE'
+        <x-avian::card title="Filters" collapsible persist="filters">
+            <x-slot:actions><button>Reset</button></x-slot:actions>
+            Body content
+            <x-slot:footer>Footer content</x-slot:footer>
+        </x-avian::card>
+    BLADE);
+
+    expect($html)->toContain('x-data="auiCard({ collapsed: false, persist: \'filters\' })"')
+        ->toContain('class="aui-card aui-card-collapsible"')
+        ->toContain('x-on:click="headerClick($event)"')
+        ->toContain('<button>Reset</button>')
+        ->toContain('class="aui-card-toggle"')
+        ->toContain('aria-expanded="true"')
+        ->toContain('aria-label="Filters"')
+        ->toContain('x-show="! collapsed"')
+        ->not->toContain('style="display: none"');
+
+    expect(strpos($html, 'class="aui-card-footer"'))->toBeGreaterThan(strpos($html, 'class="aui-card-content"'));
+});
+
+it('renders a collapsed card hidden on first paint', function () {
+    $html = Blade::render('<x-avian::card collapsible collapsed>Body</x-avian::card>');
+
+    expect($html)->toContain('auiCard({ collapsed: true, persist: null })')
+        ->toContain('aui-card aui-card-collapsible is-collapsed')
+        ->toContain('class="aui-card-header"')
+        ->toContain('aria-expanded="false"')
+        ->toContain('aria-label="Toggle content"')
+        ->toContain('style="display: none"');
+});
+
+it('ignores collapsed on a card that is not collapsible', function () {
+    $html = Blade::render('<x-avian::card title="Team" collapsed>Body</x-avian::card>');
+
+    expect($html)->toContain('class="aui-card"')
+        ->not->toContain('auiCard')
+        ->not->toContain('aui-card-toggle')
+        ->not->toContain('aui-card-content')
+        ->not->toContain('display: none');
+});
+
 it('renders a badge with a variant', function () {
     expect(Blade::render('<x-avian::badge variant="success" dot>Complete</x-avian::badge>'))
         ->toContain('aui-badge aui-badge-success aui-badge-dot')
