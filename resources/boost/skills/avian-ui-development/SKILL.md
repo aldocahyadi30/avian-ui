@@ -36,7 +36,7 @@ building. Never add a CDN tag for the package assets.
 
 **Components.** Use the anonymous components rather than hand-written markup:
 
-- general: `button`, `button-group`, `toolbar`, `card`, `stat`, `badge`, `alert`, `table`, `datalist` (+ `datalist.item`), `pagination`, `page-header`, `breadcrumbs` (+ `breadcrumbs.item`), `empty`, `avatar`, `progress`, `spinner`, `divider`, `accordion` (+ `accordion.item`), `modal`, `drawer`, `confirm`, `dropdown` (+ `dropdown.item`), `tabs` (+ `tabs.panel`)
+- general: `button`, `button-group`, `toolbar`, `card`, `stat`, `badge`, `alert`, `table`, `datalist` (+ `datalist.item`), `pagination`, `page-header`, `breadcrumbs` (+ `breadcrumbs.item`), `empty`, `avatar`, `progress`, `spinner`, `divider`, `accordion` (+ `accordion.item`), `modal`, `drawer`, `confirm`, `toasts`, `dropdown` (+ `dropdown.item`), `tabs` (+ `tabs.panel`)
 - form: `form`, `field`, `label`, `error`, `hint`, `input`, `textarea`, `select`, `searchable-select` (+ `searchable-select.option`), `multi-select` (+ `multi-select.option`), `checkbox`, `radio`, `switch`, `file`, `datepicker`
 
 Form controls render their own label, hint and validation message from `name`,
@@ -104,6 +104,13 @@ or form) — never hand-roll a confirm modal or use `wire:confirm`. From
 Livewire: `$this->dispatch('aui-confirm', message: '...', event: 'x', params: [...])`
 dispatches `x` back on a yes; from JS: `AvianUI.confirm({...})` returns a
 promise of a boolean.
+
+For action feedback, place `<x-avian::toasts />` once in the layout and flash
+`success`, `error`, `warning` or `info` on the redirect
+(`back()->with('success', 'Saved.')`), or `toast` with
+`['variant', 'title', 'message']`. From Livewire:
+`$this->dispatch('aui-toast', message: '...', variant: 'success')`; from JS:
+`AvianUI.toast('...', 'success')`. Never hand-roll a flash-message banner.
 
 Use `drawer` (same events as `modal`: `modal="name"` on a button,
 `aui-modal-open`, `hide()`) for filters or quick-edit side panels, `stat` for

@@ -45,6 +45,7 @@
             'components.modal' => ['label' => 'Modal', 'icon' => 'fas fa-window-restore'],
             'components.drawer' => ['label' => 'Drawer', 'icon' => 'fas fa-table-columns'],
             'components.confirm' => ['label' => 'Confirm dialog', 'icon' => 'fas fa-circle-question'],
+            'components.toast' => ['label' => 'Toast', 'icon' => 'fas fa-bell'],
             'components.alert' => ['label' => 'Alert', 'icon' => 'fas fa-circle-info'],
             'components.empty' => ['label' => 'Empty state', 'icon' => 'fas fa-inbox'],
         ],
@@ -644,5 +645,6 @@
 
     {{-- One shared confirm dialog for the whole page, as an app layout would have. --}}
     <x-avian::confirm />
+    <x-avian::toasts />
 </body>
 </html>

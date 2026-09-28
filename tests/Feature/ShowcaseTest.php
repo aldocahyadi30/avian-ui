@@ -28,6 +28,7 @@ it('renders every component together on the workbench showcase', function () {
         ->toContain('flatpickr-input')
         ->toContain('data-fp-no-calendar="true"')
         ->toContain('auiConfirm(')
+        ->toContain('auiToasts(')
         ->toContain('data-aui-confirm=')
         ->toContain('auiAccordion(')
         ->toContain('aui-drawer aui-drawer-right')

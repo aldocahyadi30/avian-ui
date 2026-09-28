@@ -163,6 +163,55 @@ class AvianUi
     }
 
     /**
+     * Get the toasts flashed to the session for the current request.
+     *
+     * Reads `success`, `error`, `warning` and `info` messages, plus a `toast`
+     * entry holding a message, an options array or a list of options arrays.
+     *
+     * @return list<array{variant: string, message: string, title: string|null}>
+     */
+    public function flashedToasts(): array
+    {
+        $session = app()->bound('session.store') ? app('session.store') : null;
+
+        if (! $session instanceof Store) {
+            return [];
+        }
+
+        $toasts = [];
+
+        foreach (['success' => 'success', 'error' => 'danger', 'warning' => 'warning', 'info' => 'info'] as $key => $variant) {
+            $message = $session->get($key);
+
+            if (is_string($message) && $message !== '') {
+                $toasts[] = ['variant' => $variant, 'message' => $message, 'title' => null];
+            }
+        }
+
+        $flashed = $session->get('toast');
+
+        if (is_string($flashed) || (is_array($flashed) && ! array_is_list($flashed))) {
+            $flashed = [$flashed];
+        }
+
+        foreach (is_array($flashed) ? $flashed : [] as $toast) {
+            $toast = is_string($toast) ? ['message' => $toast] : $toast;
+
+            if (! is_array($toast) || ! is_string($toast['message'] ?? null) || $toast['message'] === '') {
+                continue;
+            }
+
+            $toasts[] = [
+                'variant' => is_string($toast['variant'] ?? null) ? $toast['variant'] : 'success',
+                'message' => $toast['message'],
+                'title' => is_string($toast['title'] ?? null) ? $toast['title'] : null,
+            ];
+        }
+
+        return $toasts;
+    }
+
+    /**
      * Normalize an HTML field name into a validation error key.
      */
     public function fieldKey(string $name): string

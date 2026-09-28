@@ -497,7 +497,7 @@ flatpickr(input, {
 Available components: `accordion` (+ `accordion.item`), `alert`, `avatar`,
 `badge`, `breadcrumbs` (+ `breadcrumbs.item`), `button`, `button-group`, `card`, `confirm`,
 `divider`, `drawer`, `dropdown` (+ `dropdown.item`), `empty`, `page-header`,
-`pagination`, `progress`, `scripts`, `spinner`, `stat`, `styles`, `table`, `toolbar`,
+`pagination`, `progress`, `scripts`, `spinner`, `stat`, `styles`, `table`, `toasts`, `toolbar`,
 `datalist` (+ `datalist.item`), `tabs` (+ `tabs.panel`),
 `modal`, plus the form set `form`, `field`, `label`, `error`, `hint`, `input`,
 `textarea`, `select`, `searchable-select` (+ `searchable-select.option`),
@@ -815,7 +815,31 @@ $this->dispatch('aui-confirm', message: 'Delete this order?', event: 'order-dele
 window.AvianUI.confirm({ title: 'Discard draft?' }).then((ok) => ok && discard());
 ```
 
-The Alpine components registered by the package are `auiModal`, `auiConfirm`,
+For notifications, place `<x-avian::toasts />` once in the layout as well.
+It shows `success`, `error`, `warning` and `info` messages flashed to the
+session on its own, and `toast` accepts a title and other variants. Set
+`position` (`top-right` by default, or `top-left`, `top-center`,
+`bottom-right`, `bottom-left`, `bottom-center`), `duration` in ms (`0` keeps
+toasts open), `max`, and `:flash="false"` to ignore the session:
+
+```php
+return back()->with('success', 'Order saved.');
+return back()->with('toast', ['variant' => 'warning', 'title' => 'Low stock', 'message' => 'Only 3 left.']);
+
+// Livewire, without a redirect
+$this->dispatch('aui-toast', message: 'Order saved.', variant: 'success');
+```
+
+```js
+// Plain JavaScript; returns the toast id
+window.AvianUI.toast('Link copied.', 'info');
+window.AvianUI.toast({ title: 'Export ready', message: 'Check your inbox.', duration: 0 });
+```
+
+Hovering or focusing a toast pauses its timer. Messages are rendered as text,
+so HTML in them is escaped.
+
+The Alpine components registered by the package are `auiModal`, `auiConfirm`, `auiToasts`,
 `auiDropdown`, `auiTabs`, `auiAccordion`, `auiDismiss`, `auiFile`,
 `auiDatalist`, `auiSearchableSelect` and `auiMultiSelect`. The modal
 releases the body scroll lock on `livewire:navigating`, so `wire:navigate`

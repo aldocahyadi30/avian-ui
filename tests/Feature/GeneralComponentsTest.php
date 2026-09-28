@@ -709,3 +709,26 @@ it('renders plain, labelled and vertical dividers', function () {
         ->toContain('aui-divider-vertical')
         ->toContain('aria-orientation="vertical"');
 });
+
+it('renders the toast stack with its position and defaults', function () {
+    $html = Blade::render('<x-avian::toasts position="bottom-left" :duration="3000" :max="3" />');
+
+    expect($html)->toContain('aui-toasts aui-toasts-bottom-left')
+        ->toContain('x-data="auiToasts(')
+        ->toContain('role="region"')
+        ->toContain('aria-label="Notifications"')
+        ->toContain('\u0022duration\u0022:3000')
+        ->toContain('\u0022max\u0022:3');
+});
+
+it('hands flashed session messages to the toast stack', function () {
+    session()->flash('success', 'Order saved.');
+
+    expect(Blade::render('<x-avian::toasts />'))->toContain('Order saved.');
+});
+
+it('leaves flashed messages alone when the toast stack is told to', function () {
+    session()->flash('success', 'Order saved.');
+
+    expect(Blade::render('<x-avian::toasts :flash="false" />'))->not->toContain('Order saved.');
+});

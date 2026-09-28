@@ -2849,6 +2849,220 @@ body.aui-scroll-locked {
 }
 
 /* ==========================================================================
+   Toasts
+   ========================================================================== */
+
+.aui-toasts {
+    position: fixed;
+    z-index: 1300;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 360px;
+    max-width: calc(100vw - 32px);
+    /* The stack itself never blocks clicks on the page underneath */
+    pointer-events: none;
+}
+
+/* Newest toast sits closest to the edge it is anchored to */
+.aui-toasts-top-right,
+.aui-toasts-top-left,
+.aui-toasts-top-center {
+    top: 20px;
+    flex-direction: column-reverse;
+}
+
+.aui-toasts-bottom-right,
+.aui-toasts-bottom-left,
+.aui-toasts-bottom-center {
+    bottom: 20px;
+}
+
+.aui-toasts-top-right,
+.aui-toasts-bottom-right {
+    right: 20px;
+}
+
+.aui-toasts-top-left,
+.aui-toasts-bottom-left {
+    left: 20px;
+}
+
+.aui-toasts-top-center,
+.aui-toasts-bottom-center {
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.aui-toast {
+    --aui-toast-accent: var(--aui-success);
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 14px 14px 16px;
+    overflow: hidden;
+    background: var(--aui-surface);
+    border: 1px solid var(--aui-border);
+    border-radius: var(--aui-radius-lg);
+    box-shadow: var(--aui-shadow-overlay);
+    color: var(--aui-text);
+    font-size: 13px;
+    line-height: 1.5;
+    pointer-events: auto;
+}
+
+.aui-toast-icon {
+    flex-shrink: 0;
+    margin-top: 2px;
+    font-size: 16px;
+    color: var(--aui-toast-accent);
+}
+
+.aui-toast-content {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.aui-toast-title {
+    margin: 0 0 2px;
+    font-weight: 700;
+    color: var(--aui-heading);
+}
+
+.aui-toast-message {
+    margin: 0;
+    color: var(--aui-text);
+}
+
+.aui-toast-close {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    margin: -2px -4px 0 0;
+    padding: 0;
+    background: none;
+    border: 0;
+    border-radius: var(--aui-radius-sm);
+    color: var(--aui-slate-400);
+    font-size: 13px;
+    cursor: pointer;
+    transition: background var(--aui-transition), color var(--aui-transition);
+}
+
+.aui-toast-close:hover {
+    background: var(--aui-slate-100);
+    color: var(--aui-slate-700);
+}
+
+.aui-toast-close:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--aui-ring);
+}
+
+/* Time left, shrinking along the bottom edge; paused together with the timer */
+.aui-toast-progress {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 3px;
+    background: var(--aui-toast-accent);
+    opacity: 0.4;
+    transform-origin: left;
+    animation: aui-toast-progress linear forwards;
+}
+
+.aui-toast-progress.is-paused {
+    animation-play-state: paused;
+}
+
+@keyframes aui-toast-progress {
+    from {
+        transform: scaleX(1);
+    }
+
+    to {
+        transform: scaleX(0);
+    }
+}
+
+.aui-toast-success {
+    --aui-toast-accent: var(--aui-success);
+}
+
+.aui-toast-warning {
+    --aui-toast-accent: var(--aui-warning);
+}
+
+.aui-toast-danger {
+    --aui-toast-accent: var(--aui-danger);
+}
+
+.aui-toast-info {
+    --aui-toast-accent: var(--aui-info);
+}
+
+.aui-toast-neutral {
+    --aui-toast-accent: var(--aui-slate-500);
+}
+
+.aui-toast-transition {
+    transition: opacity var(--aui-transition), transform var(--aui-transition);
+}
+
+.aui-toast-hidden {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+}
+
+.aui-toasts-bottom-right .aui-toast-hidden,
+.aui-toasts-bottom-left .aui-toast-hidden,
+.aui-toasts-bottom-center .aui-toast-hidden {
+    transform: translateY(8px) scale(0.98);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .aui-toast-transition {
+        transition: opacity var(--aui-transition);
+    }
+
+    .aui-toast-hidden,
+    .aui-toasts-bottom-right .aui-toast-hidden,
+    .aui-toasts-bottom-left .aui-toast-hidden,
+    .aui-toasts-bottom-center .aui-toast-hidden {
+        transform: none;
+    }
+}
+
+/* Full width along the edge on phones */
+@media (max-width: 640px) {
+    .aui-toasts {
+        left: 16px;
+        right: 16px;
+        width: auto;
+        max-width: none;
+        transform: none;
+    }
+
+    .aui-toasts-top-right,
+    .aui-toasts-top-left,
+    .aui-toasts-top-center {
+        top: 16px;
+    }
+
+    .aui-toasts-bottom-right,
+    .aui-toasts-bottom-left,
+    .aui-toasts-bottom-center {
+        bottom: 16px;
+    }
+}
+
+/* ==========================================================================
    Confirm dialog
    ========================================================================== */
 

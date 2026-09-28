@@ -53,3 +53,44 @@ it('returns no validation message when nothing is bound', function () {
     expect(app(AvianUi::class)->errorFor('email'))->toBeNull()
         ->and(app(AvianUi::class)->errorFor(null))->toBeNull();
 });
+
+it('reads flashed status messages as toasts', function () {
+    session()->flash('success', 'Order saved.');
+    session()->flash('error', 'Payment failed.');
+    session()->flash('warning', 'Low stock.');
+    session()->flash('info', 'New version.');
+
+    expect(app(AvianUi::class)->flashedToasts())->toBe([
+        ['variant' => 'success', 'message' => 'Order saved.', 'title' => null],
+        ['variant' => 'danger', 'message' => 'Payment failed.', 'title' => null],
+        ['variant' => 'warning', 'message' => 'Low stock.', 'title' => null],
+        ['variant' => 'info', 'message' => 'New version.', 'title' => null],
+    ]);
+});
+
+it('reads a flashed toast as a message, an options array or a list of them', function (mixed $flashed, array $expected) {
+    session()->flash('toast', $flashed);
+
+    expect(app(AvianUi::class)->flashedToasts())->toBe($expected);
+})->with([
+    'message' => ['Saved.', [['variant' => 'success', 'message' => 'Saved.', 'title' => null]]],
+    'options' => [
+        ['variant' => 'warning', 'title' => 'Heads up', 'message' => 'Stock is low.'],
+        [['variant' => 'warning', 'message' => 'Stock is low.', 'title' => 'Heads up']],
+    ],
+    'list' => [
+        ['First.', ['message' => 'Second.', 'variant' => 'info']],
+        [
+            ['variant' => 'success', 'message' => 'First.', 'title' => null],
+            ['variant' => 'info', 'message' => 'Second.', 'title' => null],
+        ],
+    ],
+]);
+
+it('skips flashed toasts without a usable message', function () {
+    session()->flash('success', '');
+    session()->flash('error', ['not', 'a', 'string']);
+    session()->flash('toast', ['title' => 'No message']);
+
+    expect(app(AvianUi::class)->flashedToasts())->toBe([]);
+});

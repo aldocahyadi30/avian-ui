@@ -69,6 +69,29 @@
         return Promise.resolve(window.confirm(options.message || options.title || 'Are you sure?'));
     }
 
+    /*
+     * The mounted <x-avian::toasts>, if the layout has one. Toasts raised
+     * before it starts (a script that runs ahead of Alpine) wait in a queue.
+     */
+    var toastHost = null;
+    var toastQueue = [];
+
+    function toast(options, variant) {
+        options = typeof options === 'string' ? { message: options } : Object.assign({}, options || {});
+
+        if (variant) {
+            options.variant = variant;
+        }
+
+        if (toastHost) {
+            return toastHost.add(options);
+        }
+
+        toastQueue.push(options);
+
+        return null;
+    }
+
     /* data-aui-confirm-* attributes → confirm() options. */
     function confirmOptions(element) {
         var data = element.dataset;
@@ -357,6 +380,181 @@
                     unlockScroll();
 
                     resolve(ok === true);
+                },
+            };
+        },
+
+        /**
+         * Toast stack (<x-avian::toasts>).
+         *
+         *   window.AvianUI.toast('Saved.', 'success')                        // plain JS
+         *   $dispatch('aui-toast', { message: 'Saved.' })                    // Alpine
+         *   $this->dispatch('aui-toast', message: 'Saved.', variant: 'info'); // Livewire
+         *
+         * Each toast closes itself after `duration` ms (0 keeps it open); hover
+         * or focus pauses the timer so it never vanishes while being read.
+         */
+        auiToasts: function (config) {
+            config = config || {};
+
+            var icons = {
+                success: 'fas fa-circle-check',
+                warning: 'fas fa-triangle-exclamation',
+                danger: 'fas fa-circle-exclamation',
+                info: 'fas fa-circle-info',
+                neutral: 'fas fa-bell',
+            };
+
+            var nextId = 1;
+
+            return {
+                toasts: [],
+                duration: typeof config.duration === 'number' ? config.duration : 5000,
+                max: typeof config.max === 'number' && config.max > 0 ? config.max : 5,
+
+                init: function () {
+                    var self = this;
+
+                    toastHost = this;
+
+                    this.onToast = function (event) {
+                        var detail = event.detail;
+
+                        /* Livewire wraps positional dispatch params in an array. */
+                        if (detail && Array.isArray(detail.params) && ! detail.message) {
+                            detail = typeof detail.params[0] === 'string'
+                                ? { message: detail.params[0], variant: detail.params[1] }
+                                : detail.params[0];
+                        }
+
+                        self.add(typeof detail === 'string' ? { message: detail } : (detail || {}));
+                    };
+
+                    window.addEventListener('aui-toast', this.onToast);
+
+                    (config.toasts || []).concat(toastQueue.splice(0)).forEach(function (options) {
+                        self.add(options);
+                    });
+                },
+
+                destroy: function () {
+                    window.removeEventListener('aui-toast', this.onToast);
+
+                    this.toasts.forEach(function (item) {
+                        clearTimeout(item.timer);
+                    });
+
+                    if (toastHost === this) {
+                        toastHost = null;
+                    }
+                },
+
+                add: function (options) {
+                    options = options || {};
+
+                    var variant = options.variant === 'error' ? 'danger' : (options.variant || 'success');
+                    var duration = typeof options.duration === 'number' ? options.duration : this.duration;
+                    var message = options.message === undefined || options.message === null ? '' : String(options.message);
+                    var title = options.title ? String(options.title) : '';
+
+                    if (message === '' && title === '') {
+                        return null;
+                    }
+
+                    var item = {
+                        id: nextId++,
+                        variant: variant,
+                        title: title,
+                        message: message,
+                        icon: options.icon === false ? null : (options.icon || icons[variant] || icons.info),
+                        dismissible: options.dismissible !== false,
+                        duration: Math.max(0, duration),
+                        remaining: Math.max(0, duration),
+                        visible: true,
+                        paused: false,
+                        timer: null,
+                        startedAt: 0,
+                    };
+
+                    this.toasts.push(item);
+
+                    /* Past the cap, the oldest still showing makes room. */
+                    var showing = this.toasts.filter(function (t) { return t.visible; });
+
+                    if (showing.length > this.max) {
+                        this.dismiss(showing[0].id);
+                    }
+
+                    this.schedule(this.find(item.id));
+
+                    return item.id;
+                },
+
+                find: function (id) {
+                    for (var i = 0; i < this.toasts.length; i++) {
+                        if (this.toasts[i].id === id) {
+                            return this.toasts[i];
+                        }
+                    }
+
+                    return null;
+                },
+
+                schedule: function (item) {
+                    var self = this;
+
+                    if (! item || item.duration === 0) {
+                        return;
+                    }
+
+                    item.startedAt = Date.now();
+                    item.timer = setTimeout(function () {
+                        self.dismiss(item.id);
+                    }, item.remaining);
+                },
+
+                pause: function (item) {
+                    if (item.duration === 0 || item.paused || ! item.visible) {
+                        return;
+                    }
+
+                    clearTimeout(item.timer);
+                    item.remaining = Math.max(0, item.remaining - (Date.now() - item.startedAt));
+                    item.paused = true;
+                },
+
+                resume: function (item) {
+                    if (! item.paused || ! item.visible) {
+                        return;
+                    }
+
+                    item.paused = false;
+                    this.schedule(item);
+                },
+
+                dismiss: function (id) {
+                    var self = this;
+                    var item = this.find(id);
+
+                    if (! item || ! item.visible) {
+                        return;
+                    }
+
+                    clearTimeout(item.timer);
+                    item.visible = false;
+
+                    /* Leave time for the leave transition before dropping it. */
+                    setTimeout(function () {
+                        self.toasts = self.toasts.filter(function (t) { return t.id !== id; });
+                    }, 250);
+                },
+
+                clear: function () {
+                    var self = this;
+
+                    this.toasts.forEach(function (item) {
+                        self.dismiss(item.id);
+                    });
                 },
             };
         },
@@ -1334,6 +1532,7 @@
             window.AvianUI.closeModal(name);
         },
         confirm: confirmDialog,
+        toast: toast,
     };
 
     document.addEventListener('alpine:init', function () {
