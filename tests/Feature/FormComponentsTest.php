@@ -104,6 +104,39 @@ it('renders an input group with a prefix, suffix and icon', function () {
         ->toContain('aui-input-icon fas fa-globe');
 });
 
+it('attaches prepended and appended buttons to the input edges', function () {
+    $html = Blade::render(<<<'BLADE'
+        <x-avian::input name="qty" suffix="pcs">
+            <x-slot:prepend><x-avian::button>Minus</x-avian::button></x-slot:prepend>
+            <x-slot:append><x-avian::button>Plus</x-avian::button></x-slot:append>
+        </x-avian::input>
+        BLADE);
+
+    expect($html)->toContain('aui-input-group aui-input-group-suffixed aui-input-group-prepended aui-input-group-appended')
+        ->toContain('<div class="aui-input-addon aui-input-addon-prepend">')
+        ->toContain('<div class="aui-input-addon aui-input-addon-append">')
+        ->toContain('Minus')
+        ->toContain('Plus');
+
+    // prepend, input, suffix, append — in that order.
+    expect(strpos($html, 'Minus'))->toBeLessThan(strpos($html, 'name="qty"'))
+        ->and(strpos($html, 'name="qty"'))->toBeLessThan(strpos($html, 'pcs'))
+        ->and(strpos($html, 'pcs'))->toBeLessThan(strpos($html, 'Plus'));
+});
+
+it('keeps the icon inside the text box next to an appended button', function () {
+    $html = Blade::render('<x-avian::input name="q" icon="fas fa-search"><x-slot:append><x-avian::button>Go</x-avian::button></x-slot:append></x-avian::input>');
+
+    expect($html)->toContain('<div class="aui-input-control">')
+        ->toContain('aui-input-icon fas fa-search')
+        ->toContain('aui-input-group-appended');
+});
+
+it('does not group an input for an empty append slot', function () {
+    expect(Blade::render('<x-avian::input name="q"><x-slot:append></x-slot:append></x-avian::input>'))
+        ->not->toContain('aui-input-group');
+});
+
 it('renders a bare input without the field wrapper', function () {
     $html = Blade::render('<x-avian::input name="q" :field="false" placeholder="Search" />');
 

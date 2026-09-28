@@ -36,7 +36,7 @@ building. Never add a CDN tag for the package assets.
 
 **Components.** Use the anonymous components rather than hand-written markup:
 
-- general: `button`, `card`, `stat`, `badge`, `alert`, `table`, `datalist` (+ `datalist.item`), `pagination`, `page-header`, `breadcrumbs` (+ `breadcrumbs.item`), `empty`, `avatar`, `progress`, `spinner`, `divider`, `accordion` (+ `accordion.item`), `modal`, `drawer`, `confirm`, `dropdown` (+ `dropdown.item`), `tabs` (+ `tabs.panel`)
+- general: `button`, `button-group`, `toolbar`, `card`, `stat`, `badge`, `alert`, `table`, `datalist` (+ `datalist.item`), `pagination`, `page-header`, `breadcrumbs` (+ `breadcrumbs.item`), `empty`, `avatar`, `progress`, `spinner`, `divider`, `accordion` (+ `accordion.item`), `modal`, `drawer`, `confirm`, `dropdown` (+ `dropdown.item`), `tabs` (+ `tabs.panel`)
 - form: `form`, `field`, `label`, `error`, `hint`, `input`, `textarea`, `select`, `searchable-select` (+ `searchable-select.option`), `multi-select` (+ `multi-select.option`), `checkbox`, `radio`, `switch`, `file`, `datepicker`
 
 Form controls render their own label, hint and validation message from `name`,

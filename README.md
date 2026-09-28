@@ -213,6 +213,7 @@ themselves from old input after a failed validation round trip.
 | `field` | all controls | `false` renders the bare control with no wrapper |
 | `size` | input, select | `sm` or `lg` |
 | `prefix`, `suffix`, `icon` | input | Input group affixes |
+| `prepend`, `append` (slots) | input | Buttons joined to the input's edges |
 | `numeric` | input | Money-masked text field (see below) |
 | `options`, `placeholder` | select, searchable-select, multi-select | Options as `value => label` |
 | `search-placeholder`, `empty-text` | searchable-select, multi-select | Copy for the search box and empty state |
@@ -220,6 +221,18 @@ themselves from old input after a failed validation round trip.
 | `max` | multi-select | Cap how many values can be picked |
 | `inline` | checkbox, radio | Lay several out on one line |
 | `mode` (incl. `time`), `enable-time`, `time-24hr`, `date-format`, `min-date`, `max-date`, `min-time`, `max-time` | datepicker | Flatpickr config, read from `data-fp-*` attributes |
+
+Put buttons in the `prepend` or `append` slot to attach them to the input,
+for example a search box with its submit button. Give the button the same
+`size` as the input:
+
+```blade
+<x-avian::input name="q" icon="fas fa-search" placeholder="Search orders" :field="false">
+    <x-slot:append>
+        <x-avian::button type="submit">Search</x-avian::button>
+    </x-slot:append>
+</x-avian::input>
+```
 
 `numeric` renders the input as a plain text field wired to Alpine's dynamic
 money mask (`x-mask:dynamic="$money($input)"`), formatting thousands
@@ -482,9 +495,9 @@ flatpickr(input, {
 ```
 
 Available components: `accordion` (+ `accordion.item`), `alert`, `avatar`,
-`badge`, `breadcrumbs` (+ `breadcrumbs.item`), `button`, `card`, `confirm`,
+`badge`, `breadcrumbs` (+ `breadcrumbs.item`), `button`, `button-group`, `card`, `confirm`,
 `divider`, `drawer`, `dropdown` (+ `dropdown.item`), `empty`, `page-header`,
-`pagination`, `progress`, `scripts`, `spinner`, `stat`, `styles`, `table`,
+`pagination`, `progress`, `scripts`, `spinner`, `stat`, `styles`, `table`, `toolbar`,
 `datalist` (+ `datalist.item`), `tabs` (+ `tabs.panel`),
 `modal`, plus the form set `form`, `field`, `label`, `error`, `hint`, `input`,
 `textarea`, `select`, `searchable-select` (+ `searchable-select.option`),
@@ -504,6 +517,30 @@ in localStorage under that key:
 
 The card dispatches `aui-card-toggled` with `{ collapsed }` whenever it opens
 or closes.
+
+`button-group` lines up buttons in a row. Pass `attached` to join them into a
+segmented control, and mark the selected button with `active` (or
+`aria-pressed="true"`). `toolbar` goes above a table: filters sit in the
+default slot and actions in the `end` slot, pushed to the right:
+
+```blade
+<x-avian::toolbar label="Orders">
+    <x-avian::input name="q" icon="fas fa-search" placeholder="Search" :field="false" />
+
+    <x-avian::button-group attached label="Status">
+        <x-avian::button variant="light" active>All</x-avian::button>
+        <x-avian::button variant="light">Paid</x-avian::button>
+    </x-avian::button-group>
+
+    <x-slot:end>
+        <x-avian::button icon="fas fa-plus">New order</x-avian::button>
+    </x-slot:end>
+</x-avian::toolbar>
+```
+
+An `icon-only` button uses its `label` as both the `aria-label` and the native
+`title` tooltip. Add `rounded` to make it a circle, and use `size="xs"` in
+dense table rows.
 
 Breadcrumbs go right above the page header. Pass `label => url` pairs (the last
 one is the current page) or a list of `['label', 'href', 'icon']` arrays:

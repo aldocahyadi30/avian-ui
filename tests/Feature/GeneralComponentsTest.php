@@ -58,6 +58,54 @@ it('gives a modal trigger button its own alpine scope', function () {
         ->toContain('create-user');
 });
 
+it('uses the label of an icon-only button as its tooltip unless a title is given', function () {
+    expect(Blade::render('<x-avian::button icon="fas fa-pen" icon-only label="Edit" />'))
+        ->toContain('aria-label="Edit"')
+        ->toContain('title="Edit"');
+
+    expect(Blade::render('<x-avian::button icon="fas fa-pen" icon-only label="Edit" title="Edit order" />'))
+        ->toContain('title="Edit order"')
+        ->not->toContain('title="Edit"');
+});
+
+it('renders rounded, active and extra small buttons', function () {
+    expect(Blade::render('<x-avian::button variant="light" size="xs" rounded active>List</x-avian::button>'))
+        ->toContain('aui-btn aui-btn-light aui-btn-xs aui-btn-rounded aui-btn-active');
+});
+
+it('renders a button group with an accessible label', function () {
+    $html = Blade::render('<x-avian::button-group attached label="View"><x-avian::button>List</x-avian::button></x-avian::button-group>');
+
+    expect($html)->toContain('class="aui-btn-group aui-btn-group-attached"')
+        ->toContain('role="group"')
+        ->toContain('aria-label="View"')
+        ->toContain('List');
+});
+
+it('renders a plain button group without the attached or vertical modifiers', function () {
+    expect(Blade::render('<x-avian::button-group>Buttons</x-avian::button-group>'))
+        ->toContain('class="aui-btn-group"')
+        ->not->toContain('aria-label');
+
+    expect(Blade::render('<x-avian::button-group attached vertical>Buttons</x-avian::button-group>'))
+        ->toContain('aui-btn-group aui-btn-group-attached aui-btn-group-vertical');
+});
+
+it('renders a toolbar with its end slot pushed to the right', function () {
+    $html = Blade::render('<x-avian::toolbar label="Orders">Filters<x-slot:end>Actions</x-slot:end></x-avian::toolbar>');
+
+    expect($html)->toContain('class="aui-toolbar"')
+        ->toContain('role="toolbar"')
+        ->toContain('aria-label="Orders"')
+        ->toContain('aui-toolbar-start')
+        ->toContain('<div class="aui-toolbar-end">');
+});
+
+it('leaves out the toolbar end area when no end slot is given', function () {
+    expect(Blade::render('<x-avian::toolbar>Filters</x-avian::toolbar>'))
+        ->not->toContain('aui-toolbar-end');
+});
+
 it('lets a caller override the modal trigger handler', function () {
     expect(Blade::render('<x-avian::button modal="x" x-on:click="custom()">Go</x-avian::button>'))
         ->toContain('x-on:click="custom()"')

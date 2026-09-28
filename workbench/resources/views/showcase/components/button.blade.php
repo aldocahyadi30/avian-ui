@@ -2,14 +2,16 @@
     $props = [
         ['variant', 'string', "'primary'", 'primary, secondary, success, warning, danger, info, light, link — or the shapes outline / ghost.'],
         ['color', 'string|null', 'null', 'Only for outline and ghost: primary, secondary, success, warning, danger or info. Ignored on other variants.'],
-        ['size', "'sm'|'lg'|null", 'null', 'Button size. Omit for the default size.'],
+        ['size', "'xs'|'sm'|'lg'|null", 'null', 'Button size. Omit for the default size; xs suits dense table rows.'],
         ['type', 'string', "'button'", 'Native button type: button, submit or reset. Ignored when href is set.'],
         ['href', 'string|null', 'null', 'Renders an <a> instead of a <button>, styled the same way.'],
         ['navigate', 'bool', 'false', 'Adds wire:navigate to an href button (Livewire SPA navigation). Only for links inside your app.'],
         ['icon', 'string|null', 'null', 'Icon class shown before the text (e.g. "fas fa-plus").'],
         ['icon-right', 'string|null', 'null', 'Icon class shown after the text (e.g. "fas fa-arrow-right").'],
         ['icon-only', 'bool', 'false', 'Square button showing only the icon. Always pass `label` with it.'],
-        ['label', 'string|null', 'null', 'Accessible name (aria-label) for an icon-only button.'],
+        ['label', 'string|null', 'null', 'Accessible name (aria-label) for an icon-only button; also its native title tooltip unless you pass title.'],
+        ['rounded', 'bool', 'false', 'Fully rounded corners — a circle for icon-only buttons, a pill otherwise.'],
+        ['active', 'bool', 'false', 'Selected state for toggles and segmented button groups.'],
         ['loading', 'bool', 'false', 'Shows a spinner in place of the icon and disables the button.'],
         ['block', 'bool', 'false', 'Full-width button.'],
         ['disabled', 'bool', 'false', 'Disables a <button>; on a link it sets aria-disabled="true".'],
@@ -59,10 +61,12 @@
         ],
         [
             'title' => 'Icon-only buttons',
-            'text' => 'There is no visible text, so `label` is required — it becomes the aria-label screen readers announce. Add a title attribute if you also want a tooltip.',
+            'text' => 'There is no visible text, so `label` is required — it becomes the aria-label screen readers announce and the native title tooltip. Add `rounded` for a circle, and use xs/sm in dense rows.',
             'code' => <<<'BLADE'
-                <x-avian::button icon="fas fa-pen" icon-only label="Edit" variant="light" title="Edit" />
+                <x-avian::button icon="fas fa-pen" icon-only label="Edit" variant="light" />
                 <x-avian::button icon="fas fa-trash" icon-only label="Delete" variant="ghost" color="danger" />
+                <x-avian::button icon="fas fa-plus" icon-only label="Add" rounded />
+                <x-avian::button icon="fas fa-ellipsis" icon-only label="More" variant="ghost" size="xs" />
                 BLADE,
         ],
         [
@@ -88,11 +92,12 @@
         ],
         [
             'title' => 'Grouping buttons',
+            'text' => 'See Button group & toolbar for segmented controls and action bars.',
             'code' => <<<'BLADE'
-                <div class="aui-btn-group">
+                <x-avian::button-group>
                     <x-avian::button variant="light">Cancel</x-avian::button>
                     <x-avian::button>Save</x-avian::button>
-                </div>
+                </x-avian::button-group>
 
                 <x-avian::button block>Full width</x-avian::button>
                 BLADE,
@@ -128,6 +133,7 @@
             </div>
 
             <div class="aui-row" style="flex-wrap: wrap">
+                <x-avian::button size="xs">Extra small</x-avian::button>
                 <x-avian::button size="sm">Small</x-avian::button>
                 <x-avian::button>Default</x-avian::button>
                 <x-avian::button size="lg">Large</x-avian::button>
@@ -142,6 +148,11 @@
                 <x-avian::button icon="fas fa-trash" icon-only label="Delete" variant="ghost" color="danger" />
                 <x-avian::button icon="fas fa-plus" icon-only label="Add" size="sm" />
                 <x-avian::button icon="fas fa-check" icon-only label="Approve" size="lg" variant="success" />
+                <x-avian::button icon="fas fa-ellipsis" icon-only label="More" size="xs" variant="ghost" />
+                <x-avian::button icon="fas fa-plus" icon-only label="Add" rounded />
+                <x-avian::button icon="fas fa-heart" icon-only label="Favourite" rounded variant="outline" color="danger" />
+                <x-avian::button variant="light" icon="fas fa-star" active>Starred</x-avian::button>
+                <x-avian::button rounded variant="light">Pill</x-avian::button>
             </div>
 
             <x-avian::button block variant="outline">Block button</x-avian::button>

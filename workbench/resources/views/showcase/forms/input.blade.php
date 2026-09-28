@@ -12,6 +12,8 @@
         ['icon', 'string|null', 'null', 'Icon class (e.g. "fas fa-envelope") drawn inside the input on the left.'],
         ['prefix', 'string|null', 'null', 'Text addon attached to the left edge (e.g. "Rp", "https://").'],
         ['suffix', 'string|null', 'null', 'Text addon attached to the right edge (e.g. ".com", "kg").'],
+        ['prepend (slot)', 'slot', '—', 'Buttons attached to the left edge, outside any prefix.'],
+        ['append (slot)', 'slot', '—', 'Buttons attached to the right edge, outside any suffix — e.g. a search or copy button.'],
         ['numeric', 'bool', 'false', 'Money mask: formats thousands as the user types. Needs the @alpinejs/mask plugin.'],
         ['field', 'bool', 'true', 'Set :field="false" to render just the <input> without label/hint/error.'],
     ];
@@ -39,6 +41,42 @@
                 <x-avian::input name="email" label="Email" icon="fas fa-envelope" />
                 <x-avian::input name="website" label="Website" prefix="https://" suffix=".com" />
                 <x-avian::input name="weight" type="number" label="Weight" suffix="kg" />
+                BLADE,
+        ],
+        [
+            'title' => 'Input with a button',
+            'text' => 'Put buttons in the `append` or `prepend` slot and they join the input edge. Match the button size to the input size. Validation, old input and the label keep working as usual.',
+            'code' => <<<'BLADE'
+                <x-avian::form method="GET" action="{{ route('orders.index') }}">
+                    <x-avian::input name="q" icon="fas fa-search" placeholder="Search orders" :field="false">
+                        <x-slot:append>
+                            <x-avian::button type="submit">Search</x-avian::button>
+                        </x-slot:append>
+                    </x-avian::input>
+                </x-avian::form>
+
+                <x-avian::input name="invite_link" label="Invite link" :value="$link" readonly>
+                    <x-slot:append>
+                        <x-avian::button variant="light" icon="fas fa-copy" icon-only label="Copy"
+                            x-data x-on:click="navigator.clipboard.writeText('{{ $link }}')" />
+                    </x-slot:append>
+                </x-avian::input>
+                BLADE,
+        ],
+        [
+            'title' => 'Stepper and prepended buttons',
+            'text' => 'Both slots can hold several buttons, and they combine with prefix / suffix text.',
+            'code' => <<<'BLADE'
+                <div x-data>
+                    <x-avian::input name="qty" type="number" label="Quantity" value="1" suffix="pcs" x-ref="qty">
+                        <x-slot:prepend>
+                            <x-avian::button variant="light" icon="fas fa-minus" icon-only label="Decrease" x-on:click="$refs.qty.stepDown()" />
+                        </x-slot:prepend>
+                        <x-slot:append>
+                            <x-avian::button variant="light" icon="fas fa-plus" icon-only label="Increase" x-on:click="$refs.qty.stepUp()" />
+                        </x-slot:append>
+                    </x-avian::input>
+                </div>
                 BLADE,
         ],
         [
@@ -95,6 +133,26 @@
             <x-avian::input name="input_budget" label="Budget" prefix="Rp" numeric placeholder="0" />
             <x-avian::input name="input_username" label="Username" value="ada" error="This username is already taken." />
             <x-avian::input name="input_code" label="Code (disabled)" value="AUI-001" disabled />
+            <x-avian::input name="input_search" label="Search with a button" icon="fas fa-search" placeholder="Search orders">
+                <x-slot:append>
+                    <x-avian::button>Search</x-avian::button>
+                </x-slot:append>
+            </x-avian::input>
+            <x-avian::input name="input_invite" label="Invite link" value="https://example.test/invite/8F2K" readonly>
+                <x-slot:append>
+                    <x-avian::button variant="light" icon="fas fa-copy" icon-only label="Copy" />
+                </x-slot:append>
+            </x-avian::input>
+            <div x-data>
+                <x-avian::input name="input_qty" type="number" label="Quantity" value="1" suffix="pcs" x-ref="qty">
+                    <x-slot:prepend>
+                        <x-avian::button variant="light" icon="fas fa-minus" icon-only label="Decrease" x-on:click="$refs.qty.stepDown()" />
+                    </x-slot:prepend>
+                    <x-slot:append>
+                        <x-avian::button variant="light" icon="fas fa-plus" icon-only label="Increase" x-on:click="$refs.qty.stepUp()" />
+                    </x-slot:append>
+                </x-avian::input>
+            </div>
             <x-avian::input name="input_small" size="sm" label="Small" placeholder="Small control" />
             <x-avian::input name="input_large" size="lg" label="Large" placeholder="Large control" />
         </div>

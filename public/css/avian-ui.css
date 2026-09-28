@@ -33,6 +33,23 @@
     --aui-info-strong: #1e40af;
     --aui-info-border: #bfdbfe;
 
+    /* Accents - categorical colours for badges and labels */
+    --aui-purple-soft: #f5f3ff;
+    --aui-purple-strong: #5b21b6;
+    --aui-purple-border: #ddd6fe;
+    --aui-indigo-soft: #eef2ff;
+    --aui-indigo-strong: #3730a3;
+    --aui-indigo-border: #c7d2fe;
+    --aui-teal-soft: #f0fdfa;
+    --aui-teal-strong: #115e59;
+    --aui-teal-border: #99f6e4;
+    --aui-orange-soft: #fff7ed;
+    --aui-orange-strong: #9a3412;
+    --aui-orange-border: #fed7aa;
+    --aui-pink-soft: #fdf2f8;
+    --aui-pink-strong: #9d174d;
+    --aui-pink-border: #fbcfe8;
+
     /* Neutrals */
     --aui-slate-50: #f8fafc;
     --aui-slate-100: #f1f5f9;
@@ -84,6 +101,7 @@
 
     /* Controls */
     --aui-control-height: 40px;
+    --aui-control-height-xs: 28px;
     --aui-control-height-sm: 32px;
     --aui-control-height-lg: 48px;
 }
@@ -537,10 +555,173 @@
     width: 100%;
 }
 
+.aui-btn-xs {
+    height: var(--aui-control-height-xs);
+    padding: 0 10px;
+    gap: 6px;
+    font-size: 12px;
+    border-radius: var(--aui-radius-sm);
+}
+
+.aui-btn-icon.aui-btn-xs {
+    width: var(--aui-control-height-xs);
+}
+
+/* Icons: a fixed box so icons of different widths line up in a column of buttons */
+.aui-btn > i {
+    width: 1em;
+    font-size: 0.95em;
+    line-height: 1;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.aui-btn-icon > i {
+    font-size: 15px;
+}
+
+.aui-btn-icon.aui-btn-xs > i {
+    font-size: 12px;
+}
+
+.aui-btn-icon.aui-btn-sm > i {
+    font-size: 13px;
+}
+
+.aui-btn-icon.aui-btn-lg > i {
+    font-size: 18px;
+}
+
+/* An icon-only button hovers in place — the lift reads as jitter on a small square */
+.aui-btn-icon:not(:disabled):not(.aui-btn-loading):hover {
+    transform: none;
+}
+
+.aui-btn-rounded {
+    border-radius: var(--aui-radius-full);
+}
+
+/* Selected state for toggles and segmented controls */
+.aui-btn-active,
+.aui-btn[aria-pressed="true"] {
+    box-shadow: inset 0 2px 4px rgba(15, 23, 42, 0.12);
+}
+
+.aui-btn-light.aui-btn-active,
+.aui-btn-light[aria-pressed="true"],
+.aui-btn-light.aui-btn-active:not(:disabled):hover,
+.aui-btn-light[aria-pressed="true"]:not(:disabled):hover {
+    background: var(--aui-primary-light);
+    border-color: var(--aui-primary);
+    color: var(--aui-primary-darker);
+    box-shadow: none;
+}
+
+.aui-btn-active:focus-visible,
+.aui-btn[aria-pressed="true"]:focus-visible {
+    box-shadow: 0 0 0 3px var(--aui-ring);
+}
+
+/* Button group */
+
 .aui-btn-group {
     display: inline-flex;
     align-items: center;
     gap: 8px;
+}
+
+.aui-btn-group-vertical {
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.aui-btn-group-attached {
+    gap: 0;
+}
+
+.aui-btn-group-attached > .aui-btn:hover,
+.aui-btn-group-attached > .aui-btn:focus-visible,
+.aui-btn-group-attached > .aui-btn-active,
+.aui-btn-group-attached > .aui-btn[aria-pressed="true"] {
+    position: relative;
+    z-index: 1;
+}
+
+.aui-btn-group-attached > .aui-btn:focus-visible {
+    z-index: 2;
+}
+
+/* Joined buttons share borders, so a lifted one would break the seam */
+.aui-btn-group-attached > .aui-btn:not(:disabled):not(.aui-btn-loading):hover,
+.aui-input-addon > .aui-btn:not(:disabled):not(.aui-btn-loading):hover {
+    transform: none;
+}
+
+.aui-btn-group-attached:not(.aui-btn-group-vertical) > .aui-btn:not(:first-child) {
+    margin-left: -1px;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.aui-btn-group-attached:not(.aui-btn-group-vertical) > .aui-btn:not(:last-child) {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.aui-btn-group-attached.aui-btn-group-vertical > .aui-btn:not(:first-child) {
+    margin-top: -1px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+.aui-btn-group-attached.aui-btn-group-vertical > .aui-btn:not(:last-child) {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+/* Solid buttons have no visible border — draw a faint seam between them */
+.aui-btn-group-attached > .aui-btn + .aui-btn:not(:focus-visible):not(.aui-btn-active):not([aria-pressed="true"]) {
+    box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.25);
+}
+
+.aui-btn-group-attached.aui-btn-group-vertical > .aui-btn + .aui-btn:not(:focus-visible):not(.aui-btn-active):not([aria-pressed="true"]) {
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+/* Toolbar */
+
+.aui-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.aui-toolbar-start,
+.aui-toolbar-end {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.aui-toolbar-start {
+    flex: 1 1 auto;
+}
+
+.aui-toolbar-end {
+    margin-left: auto;
+}
+
+/* A search box in a toolbar takes a sensible width instead of the full row */
+.aui-toolbar .aui-input-group,
+.aui-toolbar-start > .aui-input,
+.aui-toolbar-start > .aui-select {
+    width: auto;
+    flex: 0 1 280px;
 }
 
 /* ==========================================================================
@@ -614,6 +795,42 @@
     background: var(--aui-info-soft);
     border-color: var(--aui-info-border);
     color: var(--aui-info-strong);
+}
+
+.aui-badge-dark {
+    background: var(--aui-slate-800);
+    border-color: var(--aui-slate-800);
+    color: #ffffff;
+}
+
+.aui-badge-purple {
+    background: var(--aui-purple-soft);
+    border-color: var(--aui-purple-border);
+    color: var(--aui-purple-strong);
+}
+
+.aui-badge-indigo {
+    background: var(--aui-indigo-soft);
+    border-color: var(--aui-indigo-border);
+    color: var(--aui-indigo-strong);
+}
+
+.aui-badge-teal {
+    background: var(--aui-teal-soft);
+    border-color: var(--aui-teal-border);
+    color: var(--aui-teal-strong);
+}
+
+.aui-badge-orange {
+    background: var(--aui-orange-soft);
+    border-color: var(--aui-orange-border);
+    color: var(--aui-orange-strong);
+}
+
+.aui-badge-pink {
+    background: var(--aui-pink-soft);
+    border-color: var(--aui-pink-border);
+    color: var(--aui-pink-strong);
 }
 
 /* ==========================================================================
@@ -842,7 +1059,7 @@
     box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
 }
 
-/* Input group (prefix / suffix / icon) */
+/* Input group (prefix / suffix / icon / prepended and appended buttons) */
 
 .aui-input-group {
     position: relative;
@@ -852,9 +1069,28 @@
 }
 
 .aui-input-group > .aui-input,
-.aui-input-group > .aui-select {
+.aui-input-group > .aui-select,
+.aui-input-control {
     flex: 1;
     min-width: 0;
+}
+
+/* Holds the icon and the input together, so the icon is placed against the text box */
+.aui-input-control {
+    position: relative;
+    display: flex;
+}
+
+.aui-input-control > .aui-input {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Lift the focused control above its neighbours so the whole focus ring shows */
+.aui-input-group .aui-input:focus,
+.aui-input-group .aui-select:focus {
+    position: relative;
+    z-index: 2;
 }
 
 .aui-input-affix {
@@ -878,14 +1114,33 @@
     border-radius: 0 var(--aui-radius-md) var(--aui-radius-md) 0;
 }
 
+/* A prepended / appended button is the outer edge, so the text addon next to it squares off */
+.aui-input-group-prepended > .aui-input-affix-prefix {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.aui-input-group-appended > .aui-input-affix-suffix {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
 .aui-input-group-prefixed > .aui-input,
-.aui-input-group-prefixed > .aui-select {
+.aui-input-group-prefixed > .aui-select,
+.aui-input-group-prefixed > .aui-input-control > .aui-input,
+.aui-input-group-prepended > .aui-input,
+.aui-input-group-prepended > .aui-select,
+.aui-input-group-prepended > .aui-input-control > .aui-input {
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
 }
 
 .aui-input-group-suffixed > .aui-input,
-.aui-input-group-suffixed > .aui-select {
+.aui-input-group-suffixed > .aui-select,
+.aui-input-group-suffixed > .aui-input-control > .aui-input,
+.aui-input-group-appended > .aui-input,
+.aui-input-group-appended > .aui-select,
+.aui-input-group-appended > .aui-input-control > .aui-input {
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
 }
@@ -898,11 +1153,52 @@
     color: var(--aui-slate-400);
     font-size: 13px;
     pointer-events: none;
+    z-index: 3;
+}
+
+.aui-input-group-icon .aui-input-control > .aui-input {
+    padding-left: 36px;
+}
+
+/* Buttons attached to the input edge */
+
+.aui-input-addon {
+    display: flex;
+    flex-shrink: 0;
+}
+
+.aui-input-addon-prepend {
+    margin-right: -1px;
+}
+
+.aui-input-addon-append {
+    margin-left: -1px;
+}
+
+.aui-input-addon > .aui-btn + .aui-btn {
+    margin-left: -1px;
+}
+
+.aui-input-addon > .aui-btn:hover,
+.aui-input-addon > .aui-btn:focus-visible {
+    position: relative;
     z-index: 1;
 }
 
-.aui-input-group-icon > .aui-input {
-    padding-left: 36px;
+.aui-input-addon > .aui-btn:focus-visible {
+    z-index: 3;
+}
+
+.aui-input-addon-prepend > .aui-btn,
+.aui-input-addon-append > .aui-btn:not(:last-child) {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.aui-input-addon-append > .aui-btn,
+.aui-input-addon-prepend > .aui-btn:not(:first-child) {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
 }
 
 /* ==========================================================================

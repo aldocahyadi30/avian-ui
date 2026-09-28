@@ -5,6 +5,14 @@
 
         <x-avian::button icon="fas fa-pen" icon-only label="Edit" />
 
+    The label doubles as the native `title` tooltip unless you pass your own.
+    Add `rounded` for a circular icon button (or a pill-shaped text one).
+
+    `active` marks the selected button in a segmented
+    `<x-avian::button-group attached>` (a view switcher, a filter):
+
+        <x-avian::button variant="light" active>List</x-avian::button>
+
     `navigate` adds `wire:navigate` to an `href` button for Livewire's
     SPA-style page swap. It is opt-in rather than automatic whenever `href`
     is set — an external link, a `mailto:`/`tel:` link or an on-page `#anchor`
@@ -42,6 +50,8 @@
     'label' => null,
     'loading' => false,
     'block' => false,
+    'rounded' => false,
+    'active' => false,
     'disabled' => false,
     'modal' => null,
     'confirm' => null,
@@ -70,6 +80,8 @@
         'aui-btn-'.$size => filled($size),
         'aui-btn-icon' => $iconOnly,
         'aui-btn-block' => $block,
+        'aui-btn-rounded' => $rounded,
+        'aui-btn-active' => $active,
         'aui-btn-loading' => $loading,
     ];
 @endphp
@@ -82,6 +94,7 @@
         'disabled' => $tag === 'button' && ($disabled || $loading),
         'aria-disabled' => $tag === 'a' && ($disabled || $loading) ? 'true' : null,
         'aria-label' => $iconOnly ? $label : null,
+        'title' => $iconOnly ? $label : null,
         'x-data' => $opens === null ? null : '{}',
         'x-on:click' => $opens,
         'data-aui-confirm' => filled($confirm) ? $confirm : null,

@@ -6,6 +6,7 @@
         ],
         'Actions & display' => [
             'components.button' => ['label' => 'Button', 'icon' => 'fas fa-hand-pointer'],
+            'components.button-group' => ['label' => 'Button group & toolbar', 'icon' => 'fas fa-grip-lines-vertical'],
             'components.badge' => ['label' => 'Badge', 'icon' => 'fas fa-certificate'],
             'components.avatar' => ['label' => 'Avatar', 'icon' => 'fas fa-circle-user'],
             'components.progress' => ['label' => 'Progress', 'icon' => 'fas fa-chart-simple'],
