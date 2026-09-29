@@ -16,7 +16,7 @@
 ])
 
 @php
-    $showEmpty = $empty !== false && $slot->isEmpty();
+    $showEmpty = $empty !== false && ! $slot->hasActualContent();
     $emptyColumns = $columns ?? max(count($headers), 1);
 @endphp
 

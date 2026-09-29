@@ -45,7 +45,7 @@
     $modelAttributes = $attributes->whereStartsWith('wire:model');
     $rootAttributes = $attributes->except(array_keys($modelAttributes->getAttributes()));
 
-    $showEmpty = $empty !== false && $slot->isEmpty();
+    $showEmpty = $empty !== false && ! $slot->hasActualContent();
     $hasToolbar = $toggle || isset($toolbar);
 @endphp
 

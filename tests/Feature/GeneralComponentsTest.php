@@ -264,6 +264,19 @@ it('skips the empty state on a table when it is disabled or has rows', function 
         ->and($filled)->not->toContain('aui-table-empty');
 });
 
+it('renders the empty state on a table when a row loop produces no rows', function () {
+    $html = Blade::render(<<<'BLADE'
+        <x-avian::table :headers="['Name']">
+            <!-- rows -->
+            @foreach ($users as $user)
+                <tr><td>{{ $user }}</td></tr>
+            @endforeach
+        </x-avian::table>
+        BLADE, ['users' => []]);
+
+    expect($html)->toContain('class="aui-table-empty"');
+});
+
 it('renders sortable headers as links that sort ascending by default', function () {
     $this->app->instance('request', Request::create('/users?page=3&search=ada'));
 
