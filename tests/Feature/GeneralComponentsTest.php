@@ -13,6 +13,27 @@ it('renders a button with its variant and size', function () {
         ->toContain('Delete');
 });
 
+it('renders the accent colours as solid, outline and ghost buttons', function (string $color) {
+    expect(Blade::render("<x-avian::button variant=\"{$color}\">Go</x-avian::button>"))
+        ->toContain("aui-btn aui-btn-{$color}");
+
+    expect(Blade::render("<x-avian::button variant=\"outline\" color=\"{$color}\">Go</x-avian::button>"))
+        ->toContain("aui-btn aui-btn-outline-{$color}");
+
+    expect(Blade::render("<x-avian::button variant=\"ghost\" color=\"{$color}\">Go</x-avian::button>"))
+        ->toContain("aui-btn aui-btn-ghost-{$color}");
+})->with(['dark', 'purple', 'indigo', 'teal', 'orange', 'pink']);
+
+it('ships a stylesheet rule for every button colour', function () {
+    $css = file_get_contents(__DIR__.'/../../public/css/avian-ui.css');
+
+    foreach (['primary', 'secondary', 'success', 'warning', 'danger', 'info', 'dark', 'purple', 'indigo', 'teal', 'orange', 'pink'] as $color) {
+        expect($css)->toContain(".aui-btn-{$color} {")
+            ->toContain(".aui-btn-outline-{$color} {")
+            ->toContain(".aui-btn-ghost-{$color} {");
+    }
+});
+
 it('renders a button as a link when given an href', function () {
     $html = Blade::render('<x-avian::button href="/reports" icon="fas fa-file">Reports</x-avian::button>');
 

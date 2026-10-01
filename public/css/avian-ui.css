@@ -33,7 +33,13 @@
     --aui-info-strong: #1e40af;
     --aui-info-border: #bfdbfe;
 
-    /* Accents - categorical colours for badges and labels */
+    /* Accents - categorical colours for badges, labels and buttons */
+    --aui-dark: var(--aui-slate-900);
+    --aui-purple: #8b5cf6;
+    --aui-indigo: #6366f1;
+    --aui-teal: #14b8a6;
+    --aui-orange: #f97316;
+    --aui-pink: #ec4899;
     --aui-purple-soft: #f5f3ff;
     --aui-purple-strong: #5b21b6;
     --aui-purple-border: #ddd6fe;
@@ -506,6 +512,180 @@
 .aui-btn-ghost-info:not(:disabled):hover {
     background: var(--aui-info-soft);
     color: var(--aui-info-strong);
+}
+
+/* Accent colours: solid, outline and ghost */
+.aui-btn-dark {
+    background: var(--aui-dark);
+    color: #fff;
+}
+
+.aui-btn-dark:not(:disabled):hover {
+    background: #020617;
+}
+
+.aui-btn-purple {
+    background: var(--aui-purple);
+    color: #fff;
+}
+
+.aui-btn-purple:not(:disabled):hover {
+    background: #7c3aed;
+}
+
+.aui-btn-indigo {
+    background: var(--aui-indigo);
+    color: #fff;
+}
+
+.aui-btn-indigo:not(:disabled):hover {
+    background: #4f46e5;
+}
+
+.aui-btn-teal {
+    background: var(--aui-teal);
+    color: #fff;
+}
+
+.aui-btn-teal:not(:disabled):hover {
+    background: #0d9488;
+}
+
+.aui-btn-orange {
+    background: var(--aui-orange);
+    color: #fff;
+}
+
+.aui-btn-orange:not(:disabled):hover {
+    background: #ea580c;
+}
+
+.aui-btn-pink {
+    background: var(--aui-pink);
+    color: #fff;
+}
+
+.aui-btn-pink:not(:disabled):hover {
+    background: #db2777;
+}
+
+.aui-btn-outline-dark {
+    background: transparent;
+    border-color: var(--aui-dark);
+    color: var(--aui-dark);
+}
+
+.aui-btn-outline-dark:not(:disabled):hover {
+    background: var(--aui-slate-100);
+}
+
+.aui-btn-outline-purple {
+    background: transparent;
+    border-color: var(--aui-purple);
+    color: var(--aui-purple);
+}
+
+.aui-btn-outline-purple:not(:disabled):hover {
+    background: var(--aui-purple-soft);
+}
+
+.aui-btn-outline-indigo {
+    background: transparent;
+    border-color: var(--aui-indigo);
+    color: var(--aui-indigo);
+}
+
+.aui-btn-outline-indigo:not(:disabled):hover {
+    background: var(--aui-indigo-soft);
+}
+
+.aui-btn-outline-teal {
+    background: transparent;
+    border-color: var(--aui-teal);
+    color: var(--aui-teal);
+}
+
+.aui-btn-outline-teal:not(:disabled):hover {
+    background: var(--aui-teal-soft);
+}
+
+.aui-btn-outline-orange {
+    background: transparent;
+    border-color: var(--aui-orange);
+    color: var(--aui-orange);
+}
+
+.aui-btn-outline-orange:not(:disabled):hover {
+    background: var(--aui-orange-soft);
+}
+
+.aui-btn-outline-pink {
+    background: transparent;
+    border-color: var(--aui-pink);
+    color: var(--aui-pink);
+}
+
+.aui-btn-outline-pink:not(:disabled):hover {
+    background: var(--aui-pink-soft);
+}
+
+.aui-btn-ghost-dark {
+    background: transparent;
+    color: var(--aui-dark);
+}
+
+.aui-btn-ghost-dark:not(:disabled):hover {
+    background: var(--aui-slate-100);
+}
+
+.aui-btn-ghost-purple {
+    background: transparent;
+    color: var(--aui-purple);
+}
+
+.aui-btn-ghost-purple:not(:disabled):hover {
+    background: var(--aui-purple-soft);
+    color: var(--aui-purple-strong);
+}
+
+.aui-btn-ghost-indigo {
+    background: transparent;
+    color: var(--aui-indigo);
+}
+
+.aui-btn-ghost-indigo:not(:disabled):hover {
+    background: var(--aui-indigo-soft);
+    color: var(--aui-indigo-strong);
+}
+
+.aui-btn-ghost-teal {
+    background: transparent;
+    color: var(--aui-teal);
+}
+
+.aui-btn-ghost-teal:not(:disabled):hover {
+    background: var(--aui-teal-soft);
+    color: var(--aui-teal-strong);
+}
+
+.aui-btn-ghost-orange {
+    background: transparent;
+    color: var(--aui-orange);
+}
+
+.aui-btn-ghost-orange:not(:disabled):hover {
+    background: var(--aui-orange-soft);
+    color: var(--aui-orange-strong);
+}
+
+.aui-btn-ghost-pink {
+    background: transparent;
+    color: var(--aui-pink);
+}
+
+.aui-btn-ghost-pink:not(:disabled):hover {
+    background: var(--aui-pink-soft);
+    color: var(--aui-pink-strong);
 }
 
 .aui-btn-link {

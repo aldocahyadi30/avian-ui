@@ -22,7 +22,8 @@
 
     `outline` and `ghost` are shapes, not colors on their own — pair either
     with `color` (`primary`, `secondary`, `success`, `warning`, `danger`,
-    `info`) to pick one. Without `color` they fall back to `primary`
+    `info`, or an accent: `dark`, `purple`, `indigo`, `teal`, `orange`,
+    `pink`) to pick one. Every color also works as a solid variant. Without `color` they fall back to `primary`
     (outline) or `secondary` (ghost); `color` is ignored on every other
     variant, which is already a color (`primary`, `success`, ...):
 

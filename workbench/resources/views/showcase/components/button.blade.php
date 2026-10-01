@@ -1,7 +1,7 @@
 @php
     $props = [
-        ['variant', 'string', "'primary'", 'primary, secondary, success, warning, danger, info, light, link — or the shapes outline / ghost.'],
-        ['color', 'string|null', 'null', 'Only for outline and ghost: primary, secondary, success, warning, danger or info. Ignored on other variants.'],
+        ['variant', 'string', "'primary'", 'primary, secondary, success, warning, danger, info, dark, purple, indigo, teal, orange, pink, light, link — or the shapes outline / ghost.'],
+        ['color', 'string|null', 'null', 'Only for outline and ghost: primary, secondary, success, warning, danger, info, dark, purple, indigo, teal, orange or pink. Ignored on other variants.'],
         ['size', "'xs'|'sm'|'lg'|null", 'null', 'Button size. Omit for the default size; xs suits dense table rows.'],
         ['type', 'string', "'button'", 'Native button type: button, submit or reset. Ignored when href is set.'],
         ['href', 'string|null', 'null', 'Renders an <a> instead of a <button>, styled the same way.'],
@@ -30,11 +30,21 @@
                 BLADE,
         ],
         [
+            'title' => 'Accent colours',
+            'text' => 'Beyond the status colours, dark, purple, indigo, teal, orange and pink are available as solid variants and as a `color` for outline and ghost — handy for categories that are not a status.',
+            'code' => <<<'BLADE'
+                <x-avian::button variant="dark">Archive</x-avian::button>
+                <x-avian::button variant="purple" icon="fas fa-crown">Upgrade</x-avian::button>
+                <x-avian::button variant="ghost" color="teal">Export</x-avian::button>
+                BLADE,
+        ],
+        [
             'title' => 'Outline and ghost',
             'text' => 'outline and ghost are shapes, not colours — pair them with `color`. Without it, outline falls back to primary and ghost to secondary.',
             'code' => <<<'BLADE'
                 <x-avian::button variant="outline" color="danger">Remove</x-avian::button>
                 <x-avian::button variant="ghost" color="success">Approve</x-avian::button>
+                <x-avian::button variant="outline" color="purple">Upgrade</x-avian::button>
                 BLADE,
         ],
         [
@@ -115,19 +125,25 @@
     <div class="aui-showcase-demo">
         <div class="aui-stack">
             <div class="aui-row" style="flex-wrap: wrap">
-                @foreach (['primary', 'secondary', 'success', 'warning', 'danger', 'info', 'light', 'link'] as $variant)
+                @foreach (['primary', 'secondary', 'success', 'warning', 'danger', 'info', 'dark', 'light', 'link'] as $variant)
                     <x-avian::button :variant="$variant">{{ ucfirst($variant) }}</x-avian::button>
                 @endforeach
             </div>
 
             <div class="aui-row" style="flex-wrap: wrap">
-                @foreach (['primary', 'secondary', 'success', 'warning', 'danger', 'info'] as $color)
+                @foreach (['purple', 'indigo', 'teal', 'orange', 'pink'] as $variant)
+                    <x-avian::button :variant="$variant">{{ ucfirst($variant) }}</x-avian::button>
+                @endforeach
+            </div>
+
+            <div class="aui-row" style="flex-wrap: wrap">
+                @foreach (['primary', 'secondary', 'success', 'warning', 'danger', 'info', 'dark', 'purple', 'indigo', 'teal', 'orange', 'pink'] as $color)
                     <x-avian::button variant="outline" :color="$color">{{ ucfirst($color) }}</x-avian::button>
                 @endforeach
             </div>
 
             <div class="aui-row" style="flex-wrap: wrap">
-                @foreach (['primary', 'secondary', 'success', 'warning', 'danger', 'info'] as $color)
+                @foreach (['primary', 'secondary', 'success', 'warning', 'danger', 'info', 'dark', 'purple', 'indigo', 'teal', 'orange', 'pink'] as $color)
                     <x-avian::button variant="ghost" :color="$color">{{ ucfirst($color) }}</x-avian::button>
                 @endforeach
             </div>
