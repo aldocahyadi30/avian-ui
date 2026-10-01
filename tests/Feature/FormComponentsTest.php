@@ -331,6 +331,17 @@ it('renders a multi select with chips, options and array input names', function 
     expect(substr_count($html, 'aui-combobox-item active'))->toBe(2);
 });
 
+it('preselects a multi select option marked as selected', function () {
+    $html = Blade::render(
+        '<x-avian::multi-select name="tags"><x-avian::multi-select.option value="php" label="PHP" selected /><x-avian::multi-select.option value="go" label="Go" /></x-avian::multi-select>',
+    );
+
+    expect($html)->toContain('preselect(&#039;php&#039;)')
+        ->not->toContain('preselect(&#039;go&#039;)');
+
+    expect(substr_count($html, 'aui-combobox-item active'))->toBe(1);
+});
+
 it('keeps an explicit array suffix on the multi select name', function () {
     $html = Blade::render('<x-avian::multi-select name="tags[]" :options="[\'a\' => \'A\']" />');
 

@@ -168,7 +168,7 @@
 
         <template x-teleport="body">
             <div x-ref="dropdown" class="aui-combobox-dropdown" x-show="open" x-cloak
-                :style="{ top: top + 'px', left: left + 'px', width: width + 'px' }"
+                :style="{ top: top + 'px', left: left + 'px', width: width + 'px', maxHeight: maxHeight + 'px' }"
                 x-on:keydown.escape.prevent="close(); $refs.trigger.focus()" x-on:keydown.down.prevent="move(1)"
                 x-on:keydown.up.prevent="move(-1)" x-on:keydown.enter.prevent="chooseHighlighted()"
                 role="listbox" aria-multiselectable="true">

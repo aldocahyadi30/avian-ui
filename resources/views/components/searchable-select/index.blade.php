@@ -60,7 +60,9 @@
     The dropdown itself is teleported to <body> and positioned with fixed
     coordinates computed from the trigger's bounding rect — cards use
     `overflow: hidden` for their rounded corners, which would otherwise clip
-    an absolutely-positioned dropdown that overflows the card.
+    an absolutely-positioned dropdown that overflows the card. It opens
+    upwards when the list does not fit below the trigger but there is more
+    room above, and its height is capped to the room available.
 --}}
 @props([
     'name' => null,
@@ -141,7 +143,7 @@
     })" data-aui-value="{{ $hasValue ? (string) $selected : '' }}"
         data-aui-labels="{{ json_encode((object) $seedLabels) }}" x-ref="wrapper"
         x-on:click.window="if (open && !$refs.wrapper.contains($event.target) && !$refs.dropdown.contains($event.target)) close()"
-        x-on:resize.window="if (open) reposition()" x-on:scroll.window="if (open) reposition()"
+       
         {{ $rootAttributes->class(['aui-combobox', 'is-clearable' => $clearable, 'is-disabled' => $disabled]) }}
         :class="{ 'is-open': open }">
         <button type="button" id="{{ $inputId }}" x-ref="trigger"
@@ -182,7 +184,7 @@
 
         <template x-teleport="body">
             <div x-ref="dropdown" class="aui-combobox-dropdown" x-show="open" x-cloak
-                :style="{ top: top + 'px', left: left + 'px', width: width + 'px' }"
+                :style="{ top: top + 'px', left: left + 'px', width: width + 'px', maxHeight: maxHeight + 'px' }"
                 x-on:keydown.escape.prevent="close(); $refs.trigger.focus()" x-on:keydown.down.prevent="move(1)"
                 x-on:keydown.up.prevent="move(-1)" x-on:keydown.enter.prevent="chooseHighlighted()" role="listbox">
                 <div class="aui-combobox-search">

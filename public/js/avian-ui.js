@@ -169,6 +169,55 @@
         });
     }, true);
 
+    /* Fixed-position placement for a combobox dropdown anchored to its trigger.
+       Opens below unless the list does not fit there and there is more room
+       above, and caps the height to the room on the chosen side so the list
+       scrolls instead of running off the viewport. The natural height is read
+       from the list's scrollHeight, which ignores the current cap. */
+    var DROPDOWN_GAP = 6;
+    var DROPDOWN_MARGIN = 8;
+    var DROPDOWN_MAX_HEIGHT = 280;
+
+    function placeDropdown(trigger, dropdown, list) {
+        var rect = trigger.getBoundingClientRect();
+        var natural = DROPDOWN_MAX_HEIGHT;
+
+        if (dropdown && list) {
+            var chrome = dropdown.offsetHeight - list.offsetHeight;
+            natural = Math.min(DROPDOWN_MAX_HEIGHT, chrome + list.scrollHeight);
+        }
+
+        var below = window.innerHeight - rect.bottom - DROPDOWN_GAP - DROPDOWN_MARGIN;
+        var above = rect.top - DROPDOWN_GAP - DROPDOWN_MARGIN;
+        var upwards = natural > below && above > below;
+        var maxHeight = Math.max(0, Math.min(DROPDOWN_MAX_HEIGHT, upwards ? above : below));
+
+        return {
+            top: upwards ? rect.top - DROPDOWN_GAP - Math.min(natural, maxHeight) : rect.bottom + DROPDOWN_GAP,
+            left: rect.left,
+            width: rect.width,
+            maxHeight: maxHeight,
+        };
+    }
+
+    /* Keeps an open dropdown anchored while its content changes size: a
+       client-side filter, a server search result morphing in, chips wrapping. */
+    function observeDropdown(component) {
+        if (typeof ResizeObserver === 'undefined' || ! component.$refs.list) {
+            return null;
+        }
+
+        var observer = new ResizeObserver(function () {
+            if (component.open) {
+                component.reposition();
+            }
+        });
+
+        observer.observe(component.$refs.list);
+
+        return observer;
+    }
+
     var components = {
         /**
          * Modal / dialog.
@@ -871,6 +920,8 @@
                 top: 0,
                 left: 0,
                 width: 0,
+                maxHeight: 280,
+                sizeObserver: null,
 
                 /* Seeds come from data-* attributes rather than the x-data
                    expression, so it stays constant across Livewire morphs
@@ -886,6 +937,28 @@
                         try {
                             Object.assign(this.labels, JSON.parse(dataset.auiLabels));
                         } catch (e) {}
+                    }
+
+                    /* Capture phase, so scrolling any ancestor (a modal body,
+                       a table wrapper) keeps the fixed dropdown anchored. */
+                    var self = this;
+
+                    this.follow = function () {
+                        if (self.open) {
+                            self.reposition();
+                        }
+                    };
+
+                    window.addEventListener('scroll', this.follow, true);
+                    window.addEventListener('resize', this.follow);
+                },
+
+                destroy: function () {
+                    window.removeEventListener('scroll', this.follow, true);
+                    window.removeEventListener('resize', this.follow);
+
+                    if (this.sizeObserver) {
+                        this.sizeObserver.disconnect();
                     }
                 },
 
@@ -993,12 +1066,21 @@
                     }
                 },
 
-                reposition: function () {
-                    var rect = this.$refs.trigger.getBoundingClientRect();
+                /* Observe the list lazily: the teleported dropdown does not
+                   exist yet when init() runs. */
+                watchSize: function () {
+                    if (! this.sizeObserver) {
+                        this.sizeObserver = observeDropdown(this);
+                    }
+                },
 
-                    this.top = rect.bottom + 6;
-                    this.left = rect.left;
-                    this.width = rect.width;
+                reposition: function () {
+                    var place = placeDropdown(this.$refs.trigger, this.$refs.dropdown, this.$refs.list);
+
+                    this.top = place.top;
+                    this.left = place.left;
+                    this.width = place.width;
+                    this.maxHeight = place.maxHeight;
                 },
 
                 toggle: function () {
@@ -1028,7 +1110,11 @@
                         this.pristine = true;
                     }
 
+                    /* Measure again once the dropdown is displayed. */
                     this.$nextTick(function () {
+                        self.watchSize();
+                        self.reposition();
+
                         if (self.$refs.search) {
                             if (prefill) {
                                 self.$refs.search.value = self.selectedLabel;
@@ -1170,6 +1256,8 @@
                 top: 0,
                 left: 0,
                 width: 0,
+                maxHeight: 280,
+                sizeObserver: null,
 
                 /* Seeds come from data-* attributes so the x-data expression
                    stays constant across Livewire morphs. Scroll listening
@@ -1207,6 +1295,10 @@
                 destroy: function () {
                     window.removeEventListener('scroll', this.follow, true);
                     window.removeEventListener('resize', this.follow);
+
+                    if (this.sizeObserver) {
+                        this.sizeObserver.disconnect();
+                    }
                 },
 
                 normalize: function (value) {
@@ -1227,6 +1319,17 @@
                     }
 
                     this.labels[String(value)] = label;
+                },
+
+                /* A row marked `selected` joins the picks once, when it first
+                   registers; never beyond `max`, never again after the user
+                   removed it. */
+                preselect: function (value) {
+                    value = String(value);
+
+                    if (! this.isSelected(value) && (! this.max || this.values.length < this.max)) {
+                        this.values = this.values.concat([value]);
+                    }
                 },
 
                 labelFor: function (value) {
@@ -1375,19 +1478,21 @@
                     }
                 },
 
-                reposition: function () {
-                    var rect = this.$refs.trigger.getBoundingClientRect();
-                    var height = this.$refs.dropdown ? this.$refs.dropdown.offsetHeight : 0;
-                    var top = rect.bottom + 6;
-
-                    /* Open upwards when there is no room below but there is above. */
-                    if (top + height > window.innerHeight && rect.top - 6 - height >= 0) {
-                        top = rect.top - 6 - height;
+                /* Observe the list lazily: the teleported dropdown does not
+                   exist yet when init() runs. */
+                watchSize: function () {
+                    if (! this.sizeObserver) {
+                        this.sizeObserver = observeDropdown(this);
                     }
+                },
 
-                    this.top = top;
-                    this.left = rect.left;
-                    this.width = rect.width;
+                reposition: function () {
+                    var place = placeDropdown(this.$refs.trigger, this.$refs.dropdown, this.$refs.list);
+
+                    this.top = place.top;
+                    this.left = place.left;
+                    this.width = place.width;
+                    this.maxHeight = place.maxHeight;
                 },
 
                 toggle: function () {
@@ -1405,6 +1510,7 @@
                     this.filter();
 
                     this.$nextTick(function () {
+                        self.watchSize();
                         self.reposition();
 
                         if (self.$refs.search) {

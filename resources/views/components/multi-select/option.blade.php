@@ -7,8 +7,11 @@
         </x-avian::multi-select.option>
 
     `label` is the plain text the chip shows once this row is picked; the slot
-    is only what the dropdown draws. `selected` (the parent's value list) only
-    drives the server-rendered `active` class — Alpine keeps it in sync after.
+    is only what the dropdown draws. `selected` is either the parent's value
+    list (it drives the server-rendered `active` class, Alpine keeps it in sync
+    after) or a plain `selected` flag that picks this row by default:
+
+        <x-avian::multi-select.option value="php" label="PHP" selected />
 --}}
 @props([
     'value' => null,
@@ -17,7 +20,9 @@
 ])
 
 @php
-    $isActive = in_array((string) $value, array_map('strval', (array) $selected), true);
+    $isDefault = $selected === true || $selected === '' || $selected === 'selected';
+    $isActive = $isDefault
+        || (! is_bool($selected) && in_array((string) $value, array_map('strval', (array) $selected), true));
 @endphp
 
 <button
@@ -28,7 +33,7 @@
     data-label="{{ $label }}"
     :class="{ active: isSelected(@js((string) $value)) }"
     x-bind:aria-selected="isSelected(@js((string) $value))"
-    x-init="remember(@js((string) $value), @js((string) $label))"
+    x-init="remember(@js((string) $value), @js((string) $label)){{ $isDefault ? '; preselect(' . \Illuminate\Support\Js::from((string) $value) . ')' : '' }}"
     x-on:click="toggleValue(@js((string) $value), @js((string) $label))"
     role="option"
     {{ $attributes }}
