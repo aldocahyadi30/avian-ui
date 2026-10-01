@@ -1284,7 +1284,10 @@
                     window.addEventListener('scroll', this.follow, true);
                     window.addEventListener('resize', this.follow);
 
-                    /* x-modelable hands over whatever the server holds. */
+                    /* x-modelable hands over whatever the server holds. An
+                       array is kept as is, even one of integers: rewriting it
+                       as strings would sync straight back to a `.live` model.
+                       So every comparison below goes through String(). */
                     this.$watch('values', function (value) {
                         if (! Array.isArray(value)) {
                             self.values = self.normalize(value);
@@ -1337,7 +1340,11 @@
                 },
 
                 isSelected: function (value) {
-                    return Array.isArray(this.values) && this.values.indexOf(String(value)) !== -1;
+                    value = String(value);
+
+                    return Array.isArray(this.values) && this.values.some(function (item) {
+                        return String(item) === value;
+                    });
                 },
 
                 get term() {
@@ -1355,7 +1362,7 @@
                     }
 
                     var taken = this.values.some(function (item) {
-                        return item.toLowerCase() === term || String(self.labelFor(item)).toLowerCase() === term;
+                        return String(item).toLowerCase() === term || String(self.labelFor(item)).toLowerCase() === term;
                     });
 
                     return ! taken && ! this.options().some(function (item) {
@@ -1412,7 +1419,7 @@
                     value = String(value);
 
                     this.values = this.values.filter(function (item) {
-                        return item !== value;
+                        return String(item) !== value;
                     });
 
                     this.changed();
