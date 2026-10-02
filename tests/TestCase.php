@@ -15,4 +15,10 @@ abstract class TestCase extends Orchestra
             AvianUiServiceProvider::class,
         ];
     }
+
+    protected function defineEnvironment($app): void
+    {
+        // The docs route runs through the "web" middleware, which encrypts cookies.
+        $app['config']->set('app.key', 'base64:'.base64_encode(random_bytes(32)));
+    }
 }
