@@ -28,6 +28,10 @@ class AvianUiServiceProvider extends ServiceProvider
             $this->loadRoutesFrom(__DIR__.'/../routes/avian-ui.php');
         }
 
+        if (config('avian-ui.docs.enabled', true)) {
+            $this->loadRoutesFrom(__DIR__.'/../routes/avian-ui-docs.php');
+        }
+
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'avian-ui');
 
         $this->loadTranslationsFrom(__DIR__.'/../lang', 'avian-ui');
@@ -43,7 +47,8 @@ class AvianUiServiceProvider extends ServiceProvider
         ], ['avian-ui', 'avian-ui-config']);
 
         $this->publishes([
-            __DIR__.'/../resources/views' => resource_path('views/vendor/avian-ui'),
+            // Only the components: the docs pages are not meant to be overridden.
+            __DIR__.'/../resources/views/components' => resource_path('views/vendor/avian-ui/components'),
         ], ['avian-ui', 'avian-ui-views']);
 
         $this->publishes([

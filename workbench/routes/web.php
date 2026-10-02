@@ -2,6 +2,5 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('showcase');
-});
+// The documentation ships with the package at /avian-ui.
+Route::redirect('/', '/avian-ui');

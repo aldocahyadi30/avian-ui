@@ -27,6 +27,7 @@ Use this skill when a Laravel application needs to build or restyle UI with the
 - confirm Alpine is available and that `<x-avian::scripts />` runs before it: Livewire loads Alpine at the end of the page, otherwise the app's own Alpine tag must sit below the package script
 - check `config/avian-ui.php` for a custom component `prefix` and for the `assets` strategy
 - check whether the app already defines `--color-primary` and friends before adding theme CSS
+- the package serves its own component documentation at `/avian-ui` (route `avian-ui.docs`, configured under `docs`); don't add an app route on that path
 
 ### 2. Apply the package's public API
 

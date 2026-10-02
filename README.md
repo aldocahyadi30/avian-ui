@@ -45,6 +45,10 @@ and JS are served by the package's own route — nothing to publish or build.
 Add the asset tags to your layout (see [Include the assets](#1-include-the-assets))
 and start using the components.
 
+Open `/avian-ui` in your app to browse the documentation: every component with
+a live demo, its props and copy-ready examples. See
+[Previewing the library](#7-previewing-the-library) to move or turn it off.
+
 Publishing is optional, only for customising. You may publish all of the
 package's resources at once:
 
@@ -857,16 +861,35 @@ return [
         'url' => null,         // or a base URL/path you serve the assets from
         'themes' => true,      // include the theme palette stylesheet
     ],
+
+    'docs' => [
+        'enabled' => true,          // serve the documentation page
+        'path' => 'avian-ui',       // at /avian-ui
+        'middleware' => ['web'],    // add 'auth' to keep it private
+    ],
 ];
 ```
 
 ### 7. Previewing the library
 
-```bash
-composer serve
+Once installed, the package serves its documentation at `/avian-ui` (route name
+`avian-ui.docs`): every component with a live demo, its props and copy-ready
+examples. The page loads fonts, Font Awesome, Alpine and flatpickr from a CDN
+for itself only.
+
+Publish the config to move it, protect it or switch it off, for example in
+production:
+
+```php
+'docs' => [
+    'enabled' => env('AVIAN_UI_DOCS', true),
+    'path' => 'avian-ui',
+    'middleware' => ['web', 'auth'],
+],
 ```
 
-The workbench serves a showcase page with every component on it.
+When working on the package itself, `composer serve` opens the same page in
+the workbench.
 
 ## Changelog
 
