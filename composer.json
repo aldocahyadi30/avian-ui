@@ -1,6 +1,6 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "aldocahyadi30/avian-ui",
+    "name": "avia-avian/avian-ui",
     "description": "A reusable Blade and Alpine UI component library for Avian new template.",
     "keywords": [
         "laravel",
@@ -11,7 +11,7 @@
         "ui",
         "components"
     ],
-    "homepage": "https://github.com/aldocahyadi30/avian-ui",
+    "homepage": "https://github.com/avia-avian/avian-ui",
     "license": "MIT",
     "authors": [
         {

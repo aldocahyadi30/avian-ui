@@ -5,7 +5,7 @@
         [
             'title' => '1. Install',
             'code' => <<<'BLADE'
-                composer require aldocahyadi30/avian-ui:dev-master
+                composer require avia-avian/avian-ui:dev-master
                 BLADE,
         ],
         [

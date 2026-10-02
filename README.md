@@ -3,11 +3,11 @@
 </div>
 
 <p align="center">
-    <a href="https://packagist.org/packages/aldocahyadi30/avian-ui"><img src="https://img.shields.io/packagist/v/aldocahyadi30/avian-ui.svg?style=flat-square" alt="Packagist"></a>
-    <a href="https://packagist.org/packages/aldocahyadi30/avian-ui"><img src="https://img.shields.io/packagist/php-v/aldocahyadi30/avian-ui.svg?style=flat-square" alt="PHP from Packagist"></a>
-    <a href="https://packagist.org/packages/aldocahyadi30/avian-ui"><img src="https://badge.laravel.cloud/badge/aldocahyadi30/avian-ui?style=flat" alt="Laravel versions"></a>
-    <a href="https://github.com/aldocahyadi30/avian-ui/actions"><img alt="GitHub Workflow Status (main)" src="https://img.shields.io/github/actions/workflow/status/aldocahyadi30/avian-ui/tests.yml?branch=main&label=Tests&style=flat-square"></a>
-    <a href="https://packagist.org/packages/aldocahyadi30/avian-ui"><img src="https://img.shields.io/packagist/dt/aldocahyadi30/avian-ui.svg?style=flat-square" alt="Total Downloads"></a>
+    <a href="https://packagist.org/packages/avia-avian/avian-ui"><img src="https://img.shields.io/packagist/v/avia-avian/avian-ui.svg?style=flat-square" alt="Packagist"></a>
+    <a href="https://packagist.org/packages/avia-avian/avian-ui"><img src="https://img.shields.io/packagist/php-v/avia-avian/avian-ui.svg?style=flat-square" alt="PHP from Packagist"></a>
+    <a href="https://packagist.org/packages/avia-avian/avian-ui"><img src="https://badge.laravel.cloud/badge/avia-avian/avian-ui?style=flat" alt="Laravel versions"></a>
+    <a href="https://github.com/avia-avian/avian-ui/actions"><img alt="GitHub Workflow Status (main)" src="https://img.shields.io/github/actions/workflow/status/avia-avian/avian-ui/tests.yml?branch=main&label=Tests&style=flat-square"></a>
+    <a href="https://packagist.org/packages/avia-avian/avian-ui"><img src="https://img.shields.io/packagist/dt/avia-avian/avian-ui.svg?style=flat-square" alt="Total Downloads"></a>
 </p>
 
 
@@ -22,7 +22,7 @@ point Composer at the GitHub repository first — add this to the application's
 "repositories": [
     {
         "type": "vcs",
-        "url": "https://github.com/aldocahyadi30/avian-ui"
+        "url": "https://github.com/avia-avian/avian-ui"
     }
 ]
 ```
@@ -31,12 +31,12 @@ Then require it (use a tag such as `^1.0` once one is released, or
 `dev-master` to track the main branch):
 
 ```bash
-composer require aldocahyadi30/avian-ui:dev-master
+composer require avia-avian/avian-ui:dev-master
 ```
 
 To work on the package and an application side by side, use a path
 repository instead (`"type": "path", "url": "../avian-ui"`) and require
-`aldocahyadi30/avian-ui:@dev`; Composer symlinks it, so edits show up
+`avia-avian/avian-ui:@dev`; Composer symlinks it, so edits show up
 immediately.
 
 That is all the setup there is. The service provider is auto-discovered, the
@@ -126,8 +126,8 @@ refetches the files whenever the package is updated.
 To bundle the source through Vite instead:
 
 ```js
-import '../../vendor/aldocahyadi30/avian-ui/public/css/avian-ui.css';
-import '../../vendor/aldocahyadi30/avian-ui/public/js/avian-ui.js';
+import '../../vendor/avia-avian/avian-ui/public/css/avian-ui.css';
+import '../../vendor/avia-avian/avian-ui/public/js/avian-ui.js';
 ```
 
 ### 2. Theming
